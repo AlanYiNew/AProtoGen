@@ -1,0 +1,40 @@
+syntax="proto3";
+package Res;
+import "pbc_extension.proto";
+
+message Inner {
+    int32 temp = 1;
+}
+
+enum NumVal {
+    NumVal0 = 0;
+    NumVal1 = 1;
+    NumVal2 = 2;
+}
+
+message helloworld
+{
+    int32 id = 1;       // ID
+    string str = 2[(PBCExt.max_len_1) = "20"];     // str
+    int32 opt = 3;      //optional field
+    Inner inner1 = 4;// temp
+    Inner inner2 = 5;// temp
+    Inner inner3 = 6;// temp
+    Inner inner4 = 7;// temp
+    Inner inner5 = 8;// temp
+    Inner inner6 = 9;// temp
+    Inner inner7 = 10;// temp
+    Inner inner8 = 11;// temp
+    
+    oneof object {
+        option (PBCExt.select) = "id";
+		float a  = 12[(PBCExt.oneof_id) = "NUMVAL0"];
+		uint32 b = 13[(PBCExt.oneof_id) = "NUMVAL1"];
+        Inner c = 14[(PBCExt.oneof_id) = "NUMVAL2"];
+	}
+
+    repeated string stringList = 15[(PBCExt.max_len_1) = "10", (PBCExt.max_len_2) = "20"];
+    repeated NumVal enumValList = 16[(PBCExt.max_len_1) = "1"];
+    NumVal enumVal = 17;
+}
+

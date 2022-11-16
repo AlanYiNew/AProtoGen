@@ -1,0 +1,8 @@
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/CMakeFiles/edit_cache.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto/CMakeFiles/AConvert.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto/CMakeFiles/edit_cache.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto/CMakeFiles/rebuild_cache.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto_unittest/CMakeFiles/FlatProtoUnitTest.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto_unittest/CMakeFiles/edit_cache.dir
+C:/Users/guoha/source/repos/AConvert/out/build/x64-debug/flatproto_unittest/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,115 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "flatproto",
+					"jsonFile" : "directory-flatproto-Debug-7bfe2ae1f14231c1f013.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "flatproto",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "flatproto_unittest",
+					"jsonFile" : "directory-flatproto_unittest-Debug-1d54788dc7708c90137e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "flatproto_unittest",
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "AConvert",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "FlatProtoUnitTest",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "AConvert::@093f09592603934d01ef",
+					"jsonFile" : "target-AConvert-Debug-f4846feaa1b845cd1b1b.json",
+					"name" : "AConvert",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "FlatProtoUnitTest::@7861e11e03a041e9947a",
+					"jsonFile" : "target-FlatProtoUnitTest-Debug-84ef51ed12db7cf9cfba.json",
+					"name" : "FlatProtoUnitTest",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/guoha/source/repos/AConvert/out/build/x64-debug",
+		"source" : "C:/Users/guoha/source/repos/AConvert"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}
