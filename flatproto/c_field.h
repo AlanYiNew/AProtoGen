@@ -43,8 +43,8 @@ public:
     virtual bool GenerateSetWrited(Printer* printer) = 0;
     
     // 生成赋值C成员语句
-    virtual bool GenerateAutoFillC(Printer* printer, bool fill_full=false) = 0;  
-    virtual bool GenerateAutoFillCpp(Printer* printer, bool fill_full=false) = 0;  
+    virtual bool GenerateAutoFillC(Printer* printer) = 0;  
+    virtual bool GenerateAutoFillCpp(Printer* printer) = 0;  
     // 生成自动 
     virtual bool GenerateCompareCAndCpp(Printer* printer) = 0;  
 
@@ -73,8 +73,7 @@ void SetCommVar(const FieldDescriptor* descriptor,
 // 生成自动填充repteated遍历比较代码
 void GenerateAutoFillIterationHead(
         map<string, string>* vars,
-        Printer* printer, 
-        bool fill_full=false);
+        Printer* printer);
 void GenerateAutoFillIterationTail(
         map<string, string>* vars, 
         Printer* printer);
@@ -83,7 +82,6 @@ void GenerateAutoFillIterationTail(
 void GenerateRepeatedSizeCompare(
         map<string, string>* vars, 
         Printer* printer,
-        bool fill_full,
         bool is_bytes);
 // 生成string size比较代码
 void GenerateStringSizeCompare(map<string, string>* vars, Printer* printer);

@@ -147,7 +147,7 @@ GenerateRandom(Printer* printer, bool cpp) {
 }
 
 bool CEnumFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_up) {
+GenerateAutoFillC(Printer* printer) {
     GenerateRandom(printer);
     printer->Print(vars_,
       "$param_c_var$->set_$cpp_name$($rand$);\n"); 
@@ -155,7 +155,7 @@ GenerateAutoFillC(Printer* printer, bool full_up) {
 }
     
 bool CEnumFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_up) {
+GenerateAutoFillCpp(Printer* printer) {
     GenerateRandom(printer, true);
     printer->Print(vars_, 
       "$param_cpp_var$->set_$cpp_name$($rand$);\n"); 
@@ -217,7 +217,7 @@ GenerateDecode(Printer* printer) {
 
 
 bool COneofEnumFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_up) {
+GenerateAutoFillC(Printer* printer) {
     GenerateRandom(printer);
     printer->Print(vars_,
       "$param_c_var$->set_$cpp_name$($rand$);\n"
@@ -227,7 +227,7 @@ GenerateAutoFillC(Printer* printer, bool full_up) {
 }
 
 bool COneofEnumFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_up) {
+GenerateAutoFillCpp(Printer* printer) {
     GenerateRandom(printer, true);
     printer->Print(vars_, 
       "$param_cpp_var$->set_$cpp_name$($rand$);\n"
@@ -492,8 +492,8 @@ GenerateJsonDecode(Printer* printer) {
 }
 
 bool CRepeatedEnumFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_up) {
-    GenerateAutoFillIterationHead(&vars_, printer, full_up);
+GenerateAutoFillC(Printer* printer) {
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     GenerateRandom(printer);
     printer->Print(vars_,
@@ -504,8 +504,8 @@ GenerateAutoFillC(Printer* printer, bool full_up) {
 }
 
 bool CRepeatedEnumFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_up) {
-    GenerateAutoFillIterationHead(&vars_, printer, full_up);
+GenerateAutoFillCpp(Printer* printer) {
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     GenerateRandom(printer, true);
     printer->Print(vars_,
@@ -517,7 +517,7 @@ GenerateAutoFillCpp(Printer* printer, bool full_up) {
 
 bool CRepeatedEnumFieldGenerator::
 GenerateCompareCAndCpp(Printer* printer) {
-    GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), false);
+    GenerateRepeatedSizeCompare(&vars_, printer, false);
     printer->Print(vars_,
       "for (int i = 0; i < $param_cpp_var$->$cpp_name$_size(); i++) {\n"
       "  if ((int)$param_cpp_var$->$cpp_name$(i) != (int)$param_c_var$->$cpp_name$(i)) {\n"
@@ -546,13 +546,7 @@ GetRepeatedSizeName(const FieldDescriptor* field) const {
 
 bool CRepeatedEnumFieldGenerator::
 GenerateAssignCToCpp(Printer* printer) {
-    // 数组长度字段不为空 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
-    }
-    else {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $array_max$; i++) {\n");
-    }
+    printer->Print(vars_, "for (uint32_t i = 0; i < $array_max$; i++) {\n");
     printer->Indent();
     printer->Print(vars_, "$param_cpp_var$.add_$cpp_name$(($cpp_type$)$param_c_var$.$cpp_name$(i));\n");
     printer->Outdent();

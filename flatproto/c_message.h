@@ -64,10 +64,6 @@ public:
     bool GenerateStringDeclaration(Printer* printer);
     // 生成C结构体转string定义
     bool GenerateStringDefine(Printer* printer);
-    // 生成C结构体转tlog格式string声明
-    bool GenerateStringDeclarationTlog(Printer* printer);
-    // 生成C结构体转tlog格式string定义
-    bool GenerateStringDefineTlog(Printer* printer);
 
     // 生成C结构体和Json互转声明
     bool GenerateJsonDeclarationEncode(Printer* printer);
@@ -80,10 +76,6 @@ public:
     bool GenerateJsonDefineEncodeWithDocument(Printer* printer);
     bool GenerateJsonDefineDecodeWithDocument(Printer* printer);
 
-    //生成从cmdid获得对应oneof字段名的接口
-    bool GenerateOneofFieldNameDefine(Printer* printer);
-    bool GenerateOneofFieldNameDeclaration(Printer* printer);
-    
     // 生成单元测试声明
     bool GenerateUnitTestDeclear(Printer* printer);
     // 生成单元测试定义
@@ -108,8 +100,7 @@ public:
 protected:
     // 生成填充C/CPP函数
     bool GenerateUnitTestFillDefine(Printer* printer, 
-                                    bool fill_cpp=false, 
-                                    bool fill_full=false);
+                                    bool fill_cpp=false);
     bool GenerateUnitTestCompareDefine(Printer* printer);
 
 public:

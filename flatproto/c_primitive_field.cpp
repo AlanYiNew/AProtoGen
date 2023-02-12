@@ -133,22 +133,7 @@ GenerateString(Printer* printer) {
 
 bool CPrimitiveFieldGenerator::
 GenerateStringTlog(Printer* printer) {
-    if (GetNeedToPrintAsDateTimeForm(descriptor_)) {
-        printer->Print(vars_,
-                "char time_buffer[20];\n"
-                "if (TimeStampToLocalTimeString($non_null_ptr_to_name$, time_buffer, sizeof(time_buffer)) == false){\n"
-                "   return -1;\n"
-                "}\n"
-                "string_size = snprintf(buffer, buffer_size, \"%s%c\", time_buffer, delimiter);\n"
-                "if(string_size > buffer_size) {\n"
-                "   return -1;\n"
-                "}\n"
-                "buffer_size -= string_size;\n"
-                "buffer += string_size;\n");
-    }
-    else {
-        GenerateString(printer);
-    }
+    GenerateString(printer);
 	return true;
 }
 
@@ -237,7 +222,7 @@ GenerateRandom(Printer* printer) {
 }
 
 bool CPrimitiveFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_fill) {
+GenerateAutoFillC(Printer* printer) {
     GenerateRandom(printer);
     printer->Print(vars_,
       "$param_c_var$->set_$cpp_name$($rand$);\n"); 
@@ -245,7 +230,7 @@ GenerateAutoFillC(Printer* printer, bool full_fill) {
 }
     
 bool CPrimitiveFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
+GenerateAutoFillCpp(Printer* printer) {
     GenerateRandom(printer);
     printer->Print(vars_, 
       "$param_cpp_var$->set_$cpp_name$($rand$);\n"); 
@@ -347,7 +332,7 @@ GenerateDecode(Printer* printer) {
 
 
 bool COneofPrimitiveFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_fill) {
+GenerateAutoFillC(Printer* printer) {
     GenerateRandom(printer);
     printer->Print(vars_,
       "$param_c_var$->set_$cpp_name$($rand$);\n"
@@ -356,7 +341,7 @@ GenerateAutoFillC(Printer* printer, bool full_fill) {
 }
    
 bool COneofPrimitiveFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
+GenerateAutoFillCpp(Printer* printer) {
 
     GenerateRandom(printer);
     printer->Print(vars_, 
@@ -449,9 +434,7 @@ GenerateDecode(Printer* printer) {
      printer->Print(vars_, "$size$++;\n");
      printer->Outdent();
      printer->Print(vars_, "}\n");
-     if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
-     }
+     printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
      printer->Print(vars_, "input->PopLimit(limit);\n");
     return true;
 }
@@ -652,17 +635,15 @@ GenerateJsonDecode(Printer* printer) {
     printer->Outdent();
     printer->Print("}\n");
 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_,
-                "$param_var$->$array_num$ = json_value.Size();\n");
-    }
+    printer->Print(vars_,
+        "$param_var$->$array_num$ = json_value.Size();\n");
 	return true;
 }
 
 
 bool CRepeatedPrimitiveFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_fill) {
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+GenerateAutoFillC(Printer* printer) {
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     GenerateRandom(printer);
     printer->Print(vars_, 
@@ -674,8 +655,8 @@ GenerateAutoFillC(Printer* printer, bool full_fill) {
 }
 
 bool CRepeatedPrimitiveFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+GenerateAutoFillCpp(Printer* printer) {
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     GenerateRandom(printer);
     printer->Print(vars_,
@@ -691,7 +672,7 @@ GenerateAutoFillCpp(Printer* printer, bool full_fill) {
 
 bool CRepeatedPrimitiveFieldGenerator::
 GenerateCompareCAndCpp(Printer* printer) {
-    GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), false);
+    GenerateRepeatedSizeCompare(&vars_, printer, false);
     printer->Print(vars_,
       "for (int i = 0; i < $param_cpp_var$->$cpp_name$_size(); i++) {\n"
       "  if (fabs($param_cpp_var$->$cpp_name$(i) -"
@@ -708,12 +689,8 @@ GenerateCompareCAndCpp(Printer* printer) {
 bool CRepeatedPrimitiveFieldGenerator::
 GenerateAssignCToCpp(Printer* printer) {
     // 数组长度字段不为空 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
-    }
-    else {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $array_max$; i++) {\n");
-    }
+    printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
+ 
     printer->Indent();
     printer->Print(vars_, "$param_cpp_var$.add_$cpp_name$($param_c_var$.$cpp_name$(i)));\n");
     printer->Outdent();
@@ -727,9 +704,7 @@ GenerateAssignCppToC(Printer* printer) {
     printer->Indent();
     printer->Print(vars_, "$param_c_var$.$c_name$[i] = $param_cpp_var$.$cpp_name$(i);\n");
 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_c_var$.$array_num$ = i+1;\n");
-    }
+    printer->Print(vars_, "$param_c_var$.$array_num$ = i+1;\n");
     printer->Outdent();
     printer->Print(vars_, "}\n");
     return true;

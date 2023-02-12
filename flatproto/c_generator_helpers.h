@@ -64,10 +64,6 @@ std::string GetMessageFieldHasFuncName(const FieldDescriptor* descriptor);
 // 获取清空message字段是否赋值接口名字
 std::string GetMessageFieldHasFlagClearFuncName(const FieldDescriptor* descriptor);
 
-// 获取是否有fill_full字段
-bool GetFillFullExtOption(const FieldOptions& options);
-bool GetFillFullExtOption(const FieldDescriptor* field);
-
 // 获取数组长度指定的字段名称
 bool GetArrayUseFieldName(const FieldOptions& options, string& name);
 
@@ -176,13 +172,10 @@ bool GetFieldLength(const string& field, map<string, string>& lengths);
 // 获取填充C结构函数名字
 string GetFillCFuncName(const FieldDescriptor * field);
 string GetFillCFuncName(const Descriptor * descriptor);
-string GetFillFullCFuncName(const FieldDescriptor * field);
-string GetFillFullCFuncName(const Descriptor * descriptor);
+
 // 获取填充Cpp结构函数名字
 string GetFillCppFuncName(const FieldDescriptor * field);
 string GetFillCppFuncName(const Descriptor * descriptor);
-string GetFillFullCppFuncName(const FieldDescriptor * field);
-string GetFillFullCppFuncName(const Descriptor * descriptor);
 
 // 获取C与Cpp比较函数名字
 string GetCompareCAndCppFuncName(const FieldDescriptor * field);
@@ -247,10 +240,5 @@ void PrintFillFullVarDefineWithBraceJson(Printer* printer, map<string, string>* 
 
 // 打印json的AddMember函数，在json document中添加一个key-value pair
 void PrintJsonAddMember(Printer* printer, map<string, string>* vars);
-
-bool GetNeedToPrintTlogString(const Descriptor* field);
-bool GetNeedToPrintOneofFieldName(const Descriptor* field);
-
-bool GetNeedToPrintAsDateTimeForm(const FieldDescriptor* field);
 
 #endif

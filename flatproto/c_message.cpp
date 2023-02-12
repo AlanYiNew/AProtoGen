@@ -120,8 +120,8 @@ GenerateUnitTestDeclear(Printer* printer) {
     
 bool CMessageGenerator::
 GenerateUnitTestDefine(Printer* printer) {
-    return GenerateUnitTestFillDefine(printer, false, false) &&
-    GenerateUnitTestFillDefine(printer, true, false) &&
+    return GenerateUnitTestFillDefine(printer, false) &&
+    GenerateUnitTestFillDefine(printer, true) &&
     GenerateUnitTestCompareDefine(printer);
 }
 
@@ -136,26 +136,18 @@ GenerateSpeedTestDeclear(Printer* printer) {
     
 bool CMessageGenerator::
 GenerateSpeedTestDefine(Printer* printer) {
-    return GenerateUnitTestFillDefine(printer, false, true) &&
-    GenerateUnitTestFillDefine(printer, true, true);
+    return GenerateUnitTestFillDefine(printer, false) &&
+    GenerateUnitTestFillDefine(printer, true);
 }
 
 
 bool CMessageGenerator::
-GenerateUnitTestFillDefine(Printer* printer, bool fill_cpp, bool fill_full) {
+GenerateUnitTestFillDefine(Printer* printer, bool fill_cpp) {
     if (fill_cpp) {
-        if(fill_full) {
-            printer->Print(GetFillFullCppFun().c_str());
-        } else {
-            printer->Print(GetFillCppFun().c_str());
-        }
+        printer->Print(GetFillCppFun().c_str());
         
     } else {
-        if(fill_full) {
-            printer->Print(GetFillFullCFun().c_str());
-        } else {
-           printer->Print(GetFillCFun().c_str());
-        }
+        printer->Print(GetFillCFun().c_str());
     }
 
     printer->Print(" {\n");
@@ -165,10 +157,11 @@ GenerateUnitTestFillDefine(Printer* printer, bool fill_cpp, bool fill_full) {
         printer->Print("{\n");
         printer->Indent();
         CFieldGenerator* generator = field_genertors_.Get(field); 
+
         if (fill_cpp) {
-           generator->GenerateAutoFillCpp(printer, fill_full);
-        } else {
-           generator->GenerateAutoFillC(printer, fill_full);
+            generator->GenerateAutoFillCpp(printer);
+        }   else {
+            generator->GenerateAutoFillC(printer);
         }
 
         printer->Outdent();
@@ -194,16 +187,12 @@ GenerateUnitTestFillDefine(Printer* printer, bool fill_cpp, bool fill_full) {
         }
         printer->Print("};\n");
         printer->Outdent();
-        if(fill_full) {
-            printer->Print(
-                "switch (0) {\n");
-        } else {
-             printer->Print(
-                "int length = sizeof($oneof_name$_enum)/sizeof(int);\n"
-                "int rand_enum = $oneof_name$_enum[random() % length];\n"
-                "switch (rand_enum) {\n", 
-                "oneof_name", it->first->name());
-        }
+        
+        printer->Print(
+           "int length = sizeof($oneof_name$_enum)/sizeof(int);\n"
+           "int rand_enum = $oneof_name$_enum[random() % length];\n"
+           "switch (rand_enum) {\n", 
+           "oneof_name", it->first->name());
         
         printer->Indent();
         for (size_t i = 0; i < it->second.size(); i++) {
@@ -213,10 +202,11 @@ GenerateUnitTestFillDefine(Printer* printer, bool fill_cpp, bool fill_full) {
               "value", GetCUnionFieldIDName(field));
             printer->Indent();
             CFieldGenerator* generator = field_genertors_.Get(field); 
+
             if (fill_cpp) {
-                generator->GenerateAutoFillCpp(printer, fill_full);
-            } else {
-                generator->GenerateAutoFillC(printer, fill_full);
+                generator->GenerateAutoFillCpp(printer);
+            }   else {
+                generator->GenerateAutoFillC(printer);
             }
             printer->Outdent();
             printer->Print("}\nbreak;\n");
@@ -332,7 +322,7 @@ GenerateEncodeUnitTest(Printer* printer) {
         // 使用pbc将c结构体编码为json字符串
         "// use pbc to encode an object to json string\n"
         "memset(&msg_obj_c, 0, sizeof(msg_obj_c));\n"
-        "$fill_c_full$(&msg_obj_c);\n"
+        "$fill_c$(&msg_obj_c);\n"
         "$cpp_name$ msg_obj_cpp_json;\n"
         "int buffer_len = 10000000;\n"
         "char* buffer = (char *)malloc(buffer_len);\n"
@@ -413,12 +403,12 @@ GenerateEncodeUnitTest(Printer* printer) {
         "free(buffer);\n" ,
 
         "cpp_name", GetCppStructFullName(descriptor_),
+        "fill_c", GetFillCFuncName(descriptor_),
         "to_json_func", GetJsonFuncNameEncode(descriptor_),
         "from_json_func", GetJsonFuncNameDecode(descriptor_),
         "c_name", GetCStructName(descriptor_),
         "assign_c2cpp", GetC2CppFunName(descriptor_),
-        "compare_func", GetCompareCAndCppFuncName(descriptor_),
-        "fill_c_full", GetFillFullCFuncName(descriptor_));
+        "compare_func", GetCompareCAndCppFuncName(descriptor_));
     return true;
 }
 
@@ -445,6 +435,7 @@ GenerateDecodeUnitTest(Printer* printer) {
       "}\n", 
       "cpp_name", GetCppStructFullName(descriptor_),
       "c_name", GetCStructName(descriptor_),
+      "fill_c", GetFillCFuncName(descriptor_),
       "fill_cpp", GetFillCppFuncName(descriptor_),
       "parse_func", GetDecodeFuncName(descriptor_),
       "compare_func", GetCompareCAndCppFuncName(descriptor_));
@@ -497,26 +488,6 @@ GenerateDecodeUnitTest(Printer* printer) {
     //     "assign_c2cpp", GetC2CppFunName(descriptor_),
     //     "compare_func", GetCompareCAndCppFuncName(descriptor_));
     
-    // tlog string测试
-    if (GetNeedToPrintTlogString(descriptor_)) {
-        printer -> Print(
-        "int tlog_len = 1000000;\n"
-        "char* tlog_buffer = ( char*)malloc(tlog_len);\n"
-        "int tlog_ret = $tlog_func$(&msg_obj_c, tlog_buffer, tlog_len ,'|');\n"
-        "if(tlog_ret == -1){\n"
-        "   printf(\"size not enough\\n\");\n"
-        "}\n"
-        "printf(\"$c_name$(%d): %s\\n\\n\\n\", tlog_ret, tlog_buffer);\n"
-        "std::cout<<\"CPP: \"<<std::endl;\n"
-        "std::cout<<msg_obj_cpp.DebugString();\n"
-        "free(tlog_buffer);\n",
-        "tlog_func", GetStringFuncNameTlog(descriptor_),
-        "to_json_func", GetJsonFuncNameEncode(descriptor_),
-        "from_json_func", GetJsonFuncNameDecode(descriptor_),
-        "c_name", GetCStructName(descriptor_),
-        "assign_c2cpp", GetC2CppFunName(descriptor_),
-        "compare_func", GetCompareCAndCppFuncName(descriptor_));
-    }
     return true;
 }
 
@@ -525,7 +496,7 @@ GenerateEncodeSpeedTest(Printer* printer) {
     map<string,string> vars;
     vars["cpp_name"] = GetCppStructFullName(descriptor_);
     vars["c_name"] = GetCStructName(descriptor_);
-    vars["fill_c"] = GetFillFullCFuncName(descriptor_);
+    vars["fill_c"] = GetFillCFuncName(descriptor_);
     vars["serialize_func"] = GetEncodeFuncName(descriptor_);
     vars["byte_size_long_func"] = GetEncodeFuncNameByteSizeLong(descriptor_);
     vars["assign_c2cpp"] = GetC2CppFunName(descriptor_);
@@ -535,7 +506,7 @@ GenerateEncodeSpeedTest(Printer* printer) {
 
     printer->Print(vars,
         "std::chrono::high_resolution_clock::time_point current_time, start_time;\n"
-        "std::chrono::milliseconds c_elapsed_time, cpp_elapsed_time;\n"
+        "std::chrono::milliseconds c_elapsed_time{}, cpp_elapsed_time{};\n"
         "int len1,len2;\n"
         "::google::protobuf::uint8* c_buffer;\n"
         "static $c_name$ c_message;\n"
@@ -573,7 +544,7 @@ GenerateDecodeSpeedTest(Printer* printer) {
     map<string,string> vars;
     vars["cpp_name"] = GetCppStructFullName(descriptor_);
     vars["c_name"] = GetCStructName(descriptor_);
-    vars["fill_c"] = GetFillFullCFuncName(descriptor_);
+    vars["fill_c"] = GetFillCFuncName(descriptor_);
     vars["parse_func"] = GetDecodeFuncName(descriptor_);
     vars["serialize_func"] = GetEncodeFuncName(descriptor_);
     vars["byte_size_long_func"] = GetEncodeFuncNameByteSizeLong(descriptor_);
@@ -584,7 +555,7 @@ GenerateDecodeSpeedTest(Printer* printer) {
 
     printer->Print(vars,
         "std::chrono::high_resolution_clock::time_point current_time, start_time;\n"
-        "std::chrono::milliseconds c_elapsed_time, cpp_elapsed_time;\n"
+        "std::chrono::milliseconds c_elapsed_time{}, cpp_elapsed_time{};\n"
         "int len1,len2;\n"
         "::google::protobuf::uint8* c_buffer;\n"
         "static $c_name$ c_message;\n"
@@ -632,13 +603,13 @@ string CMessageGenerator::GetFillCppFun() {
 }
     
 string CMessageGenerator::GetFillFullCFun() {
-    return  "void " + GetFillFullCFuncName(descriptor_) + "(" + 
+    return  "void " + GetFillCFuncName(descriptor_) + "(" + 
         GetCStructName(descriptor_) + "* " + vars_["param_c_var"] + 
         ")";
 }
     
 string CMessageGenerator::GetFillFullCppFun() {
-    return  "void " + GetFillFullCppFuncName(descriptor_) + "(" + 
+    return  "void " + GetFillCppFuncName(descriptor_) + "(" + 
         GetCppStructFullName(descriptor_) + "* " + 
         vars_["param_cpp_var"] + ")";
 }
@@ -734,18 +705,6 @@ GetStringFuncDeclaration(const Descriptor* descriptor) {
         "* " + vars_["param_var"]  + 
         ", char* buffer," + 
         " int size," +  
-        " char delimiter)";
-}
-
-string CMessageGenerator::
-GetStringFuncDeclarationTlog(const Descriptor* descriptor) {
-    return 
-        "int " + GetStringFuncNameTlog(descriptor) + "(\n" +
-        "const " + 
-        GetCStructName(descriptor) + 
-        "* " + vars_["param_var"]  + 
-        ", char* buffer," + 
-        " int size," +
         " char delimiter)";
 }
 
@@ -1000,106 +959,6 @@ GenerateStringDefine(Printer* printer) {
 }
 
 bool CMessageGenerator::   
-GenerateStringDeclarationTlog(Printer* printer) {
-    // 在message层决定是否要生成内容
-    if(!GetNeedToPrintTlogString(descriptor_))
-        return false;
-
-    printer->Print("$func$;\n", 
-            "func", GetStringFuncDeclarationTlog(descriptor_));
-  return true;
-}
-
-bool CMessageGenerator::   
-GenerateStringDefineTlog(Printer* printer) {
-    // 在message层决定是否要生成内容
-    if(!GetNeedToPrintTlogString(descriptor_))
-        return false;
-
-    printer->Print("$func$ {\n", 
-        "func", GetStringFuncDeclarationTlog(descriptor_));
-
-    printer->Print("// @@protoc_insertion_point(message_debug_string_start:$full_name$)\n",
-            "full_name",descriptor_->full_name());
-    printer->Indent();
-    printer->Print(
-            "int buffer_size = size;\n"
-            "int string_size = 0;\n");
-
-    // 处理oneof中的字段 
-    set<string> oneofReferNameMap;
-    string oneofReferName;
-    string enumfieldvalue;
-    for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
-        // 如果存在PBCExt::select，则记录下该oneof refer的名字
-        oneofReferName = GetCStructUnionSelectVarName(descriptor_->oneof_decl(i));
-        StripWhitespace(&oneofReferName);
-        if (oneofReferName != "") {
-            oneofReferNameMap.insert(oneofReferName);
-        }
-
-        printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
-                "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
-                "param_var", vars_["param_var"]);
-        printer->Indent();
-        for (int j = 0; j < descriptor_->oneof_decl(i)->field_count(); j++) {
-            const FieldDescriptor* field = descriptor_->oneof_decl(i)->field(j);
-            PrintFieldComment(printer, field);
-
-#ifdef UNION_NORAML
-            enumfieldvalue = GetCUnionEnumFieldName(field);
-#else
-            enumfieldvalue = GetCUnionFieldIDName(field);
-#endif
-            printer->Print("case $enumfieldvalue$: {\n",
-                    "enumfieldvalue",enumfieldvalue);
-            printer->Indent();
-            
-            CFieldGenerator* filed_generator = field_genertors_.Get(field);
-            filed_generator->GenerateStringTlog(printer);
-
-            printer->Print(
-                    "break;\n");
-            printer->Outdent();
-            printer->Print(
-                    "}\n");
-        }
-
-        printer->Outdent();
-        printer->Print(
-                "}\n");
-    }
-
-    // 处理不在oneof中的字段
-    for (int i = 0; i < descriptor_->field_count(); i++) {
-        const FieldDescriptor* field = descriptor_->field(i);
-        if (NULL != field->containing_oneof()) continue;
-        if (oneofReferNameMap.find(field->name()) !=  oneofReferNameMap.end()) { continue;}  // 不处理  one of refer
-        PrintFieldComment(printer, field);
-        printer->Print("{\n");
-        printer->Indent();
-        CFieldGenerator* filed_generator = field_genertors_.Get(field);
-        filed_generator->GenerateStringTlog(printer);
-        printer->Outdent();
-        printer->Print(
-                "}\n"
-                "\n");
-    }
-
-    printer->Print(
-                "if(size != buffer_size) {\n"
-                "   buffer--;\n"
-                "   buffer_size++;\n"
-                "}\n"
-                "buffer[0] = '\\0';\n"
-                "return size - buffer_size;\n");
-    printer->Outdent();
-    printer->Print("}\n\n");
-    return true;
-}
-
-bool CMessageGenerator::   
 GenerateJsonDeclarationEncode(Printer* printer) {
     printer->Print("$func$;\n", 
             "func", GetJsonFuncDeclarationEncode(descriptor_));
@@ -1292,75 +1151,6 @@ GenerateJsonDefineDecodeWithDocument(Printer* printer) {
   return true;
 }
 
-string CMessageGenerator::
-GetOneofFieldNameFuncDeclaration(const Descriptor* descriptor) {
-    return 
-        "const char* " + GetOneofFieldNameFuncName(descriptor) + "(int cmd)";
-}
-
-
-bool CMessageGenerator::   
-GenerateOneofFieldNameDeclaration(Printer* printer) {
-    // 在message层决定是否要生成内容
-    if(!GetNeedToPrintOneofFieldName(descriptor_))
-        return false;
-    printer->Print("$func$;\n", 
-            "func", GetOneofFieldNameFuncDeclaration(descriptor_));
-    return true;
-}
-
-bool CMessageGenerator::   
-GenerateOneofFieldNameDefine(Printer* printer) {
-    // 在message层决定是否要生成内容
-    if(!GetNeedToPrintOneofFieldName(descriptor_))
-        return false;
-
-    printer->Print("$func$ {\n", 
-        "func", GetOneofFieldNameFuncDeclaration(descriptor_));
-
-    printer->Print("// @@protoc_insertion_point(message_debug_string_start:$full_name$)\n",
-            "full_name",descriptor_->full_name());
-    printer->Indent();
-
-    // 处理oneof中的字段 
-    set<string> oneofReferNameMap;
-    string oneofReferName;
-    string enumfieldvalue;
-    for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
-        printer->Print(
-                "switch (cmd) {\n");
-        printer->Indent();
-        for (int j = 0; j < descriptor_->oneof_decl(i)->field_count(); j++) {
-            const FieldDescriptor* field = descriptor_->oneof_decl(i)->field(j);
-            PrintFieldComment(printer, field);
-
-#ifdef UNION_NORAML
-            enumfieldvalue = GetCUnionEnumFieldName(field);
-#else
-            enumfieldvalue = GetCUnionFieldIDName(field);
-#endif
-            printer->Print("case $enumfieldvalue$: {\n",
-                    "enumfieldvalue",enumfieldvalue);
-            printer->Indent();
-            
-            printer->Print("return \"$field_name$\";\n", 
-                    "field_name", field->name());
-
-            printer->Outdent();
-            printer->Print(
-                    "}\n");
-        }
-        printer->Print("default: return \"\";\n");
-        printer->Outdent();
-        printer->Print(
-                "}\n");
-    }
-    printer->Print("return \"\";\n");
-    printer->Outdent();
-    printer->Print("}\n\n");
-    return true;
-}
-    
 bool CMessageGenerator::GenerateClearDeclaration(Printer* printer) {
     printer->Print("$func$;\n",
             "func", GetClearFuncDeclaration(descriptor_));

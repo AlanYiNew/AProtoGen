@@ -167,16 +167,10 @@ void SetCommVar(const FieldDescriptor* descriptor,
 
 void GenerateAutoFillIterationHead(
         map<string, string>* vars, 
-        Printer* printer,
-        bool full_fill) {
+        Printer* printer) {
 
-    if(full_fill) {
-      printer->Print(*vars,
-          "int $c_name$_max = $array_max$;\n");
-    } else {
-      printer->Print(*vars,
-          "int $c_name$_max = random()%($array_max$ +1);\n");
-    }
+    printer->Print(*vars,
+       "int $c_name$_max = random()%($array_max$ +1);\n");
     printer->Print(*vars, 
       "for (int i = 0; i < $c_name$_max; i++) {\n");
 }
@@ -191,7 +185,6 @@ void GenerateAutoFillIterationTail(
 void GenerateRepeatedSizeCompare(
         map<string, string>* vars,
         Printer* printer,
-        bool fill_full,
         bool is_bytes) {
 
     if (is_bytes) {
@@ -203,14 +196,9 @@ void GenerateRepeatedSizeCompare(
                 "  int cpp_$cpp_name$_count = $param_cpp_var$->$cpp_name$_size();\n");
     }
 
-    if (fill_full) {
-        printer->Print((*vars),
-                "  int c_$cpp_name$_count = $array_max$;\n");
-    }
-    else {
-       printer->Print((*vars),
-                "  int c_$cpp_name$_count = $param_c_var$->$array_num$;\n");
-    }
+
+    printer->Print((*vars),
+            "  int c_$cpp_name$_count = $param_c_var$->$array_num$;\n");
 
     printer->Print((*vars),
             "if (cpp_$cpp_name$_count != c_$cpp_name$_count) {\n"

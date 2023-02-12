@@ -534,7 +534,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Print(vars, "inline $msgname$* $mutable_func$() {\n");
         printer.Indent();
         printer.Print(vars,
-            "if ($has_func$()){\n"
+            "if (!$has_func$()){\n"
             "    $has_var$[$has_index$] |= $has_mask$;\n"
             "}\n"
             "return &$name$;\n");
@@ -822,7 +822,11 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Indent();
         printer.Print(vars,
             "if ($refer_name$ >= $max_len_1$) return;\n"
-            "strncpy_s($name$[$refer_name$++],  sizeof($name$), field, strlen(field));\n");
+#if defined (_WIN32) || (_WIN64)
+            "strncpy_s($name$[$refer_name$++],  sizeof($name$[0]), field, strlen(field));\n");
+#else
+            "strncpy($name$[$refer_name$++], field,  sizeof($name$[0]));$name$[$refer_name$-1][sizeof($name$[0]) - 1] = 0;\n");
+#endif
         printer.Outdent();
         printer.Print("}\n");
 
@@ -847,7 +851,11 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Print(vars, "inline void set_$access_func$(const $type$* field) {\n");
         printer.Indent();
         printer.Print(vars,
+#if defined (_WIN32) || (_WIN64)
             "strncpy_s($name$,  sizeof($name$), field, strlen(field));\n");
+#else
+            "strncpy($name$, field,  sizeof($name$));$name$[sizeof($name$)-1]=0;\n");
+#endif
         printer.Outdent();
         printer.Print("}\n");
     }

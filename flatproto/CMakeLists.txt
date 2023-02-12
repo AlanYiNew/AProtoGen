@@ -3,14 +3,22 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-
-
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 SET(Protobuf_INCLUDE_DIR ../include/)
 SET(Protobuf_LIBRARY ../lib/)
 SET(CMAKE_CURRENT_BINARY_DIR ./)
+
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+	message("current platform: Linux ")
+    SET(PROTOC_EXECUTABLE protoc)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+	message("current platform: Windows ")
+    SET(PROTOC_EXECUTABLE protoc.exe)
+else()
+	message("current platform: unkonw ")
+endif()
 
 SET(PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../test_proto")
 SET(LIB_PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../proto")
@@ -36,31 +44,35 @@ file(GLOB SRC_FILES
 include_directories(${Protobuf_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${LIB_PROTO_PATH})
-link_directories(${Protobuf_LIBRARY})
-link_directories(${Protobuf_INCLUDE_DIR})
 
 add_custom_command(OUTPUT ${LIB_PROTO_SOURCES}
                    PRE_BUILD
-                   COMMAND ../lib/protoc.exe --cpp_out=${LIB_PROTO_PATH}  -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
+                   COMMAND ../lib/${PROTOC_EXECUTABLE} --cpp_out=${LIB_PROTO_PATH}  -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${LIB_PROTO_FILES}
                    COMMENT ${COMMAND})
 
 add_custom_command(OUTPUT ${OUTPUT_SOURCES}
                    PRE_BUILD
-                   COMMAND ../lib/protoc.exe --cpp_out=${PROTO_PATH} -I${PROTO_PATH} -I${LIB_PROTO_PATH} ${PROTO_FILES}
+                   COMMAND ../lib/${PROTOC_EXECUTABLE} --cpp_out=${PROTO_PATH} -I${PROTO_PATH} -I${LIB_PROTO_PATH} ${PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${PROTO_FILES} ${LIB_PROTO_SOURCES}
                    COMMENT ${COMMAND})
 
-
-
+add_executable(AConvert ${SRC_FILES} ${OUTPUT_SOURCES} ${LIB_PROTO_SOURCES})
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+	message("current platform: Linux ")
+    target_link_libraries(AConvert  protoc protobuf protobuf-lite pthread)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+	message("current platform: Windows ")
+    target_link_libraries(AConvert libprotobuf libprotoc libprotobuf-lite)
+    target_compile_options(AConvert PRIVATE "/MT$<$<CONFIG:Release>:>")
+else()
+	message("current platform: unkonw ")
+endif()
 
 # 将源代码添加到此项目的可执行文件。
-add_executable(AConvert ${SRC_FILES} ${OUTPUT_SOURCES} ${LIB_PROTO_SOURCES})
-target_link_libraries(AConvert libprotobuf libprotoc libprotobuf-lite)
-target_compile_options(AConvert PRIVATE "/MT$<$<CONFIG:Release>:>")
-
+target_link_directories(AConvert PRIVATE ${Protobuf_LIBRARY} ${Protobuf_INCLUDE_DIR})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AConvert PROPERTY CXX_STANDARD 14)

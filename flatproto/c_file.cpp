@@ -339,7 +339,6 @@ GenerateStringHeader(Printer* printer) {
 
     for (size_t i = 0; i < message_generators_.size(); ++i) {
         message_generators_[i]->GenerateStringDeclaration(printer);
-        message_generators_[i]->GenerateStringDeclarationTlog(printer);
     }
     printer->Print("#ifdef __cplusplus\n"
             "}\n"
@@ -361,7 +360,6 @@ GenerateStringSource(Printer* printer) {
     GenerateGLogInclude(printer);
     for (size_t i = 0; i < message_generators_.size(); ++i) {
         message_generators_[i]->GenerateStringDefine(printer);
-        message_generators_[i]->GenerateStringDefineTlog(printer);
     }
     return true;
 }
@@ -408,7 +406,6 @@ GenerateJsonHeader(Printer* printer) {
         message_generators_[i]->GenerateJsonDeclarationEncodeWithDocument(printer);
         message_generators_[i]->GenerateJsonDeclarationDecode(printer);
         message_generators_[i]->GenerateJsonDeclarationDecodeWithDocument(printer);
-        message_generators_[i]->GenerateOneofFieldNameDeclaration(printer);
     }
     printer->Print("#ifdef __cplusplus\n"
             "}\n"
@@ -430,7 +427,6 @@ GenerateJsonSource(Printer* printer) {
         message_generators_[i]->GenerateJsonDefineEncodeWithDocument(printer);
         message_generators_[i]->GenerateJsonDefineDecode(printer);
         message_generators_[i]->GenerateJsonDefineDecodeWithDocument(printer);
-        message_generators_[i]->GenerateOneofFieldNameDefine(printer);
     }
     return true;
 }

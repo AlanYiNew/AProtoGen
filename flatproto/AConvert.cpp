@@ -15,12 +15,11 @@ int main(int argc, char* argv[]) {
     //   argc, argv, &generator);
     google::protobuf::compiler::CommandLineInterface cli;
 
-    CResourceGenerator generator;
-    CTotalGenerator cgenerator;
+    std::unique_ptr<CTotalGenerator> c_generator = std::make_unique<CTotalGenerator>();
     // 官方实现的C++编译器后端
-    google::protobuf::compiler::cpp::CppGenerator cpp_generator;
-    cli.RegisterGenerator("--cpp_out", &cpp_generator, "Generate C++ source and header.");
-    cli.RegisterGenerator("--flat_out", "--flat_opt", &cgenerator, "Generate Flat file.");
+    std::unique_ptr<google::protobuf::compiler::cpp::CppGenerator> cpp_generator = std::make_unique<google::protobuf::compiler::cpp::CppGenerator>();
+    cli.RegisterGenerator("--cpp_out", cpp_generator.get(), "Generate C++ source and header.");
+    cli.RegisterGenerator("--flat_out", "--flat_opt", c_generator.get(), "Generate Flat file.");
     /*
     argc = 6;
     argv[1] = "--c_out=./";

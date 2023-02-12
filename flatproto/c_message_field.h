@@ -27,8 +27,8 @@ public:
     virtual bool GenerateStringTlog(Printer* printer);
     virtual bool GenerateJsonEncode(Printer* printer);
     virtual bool GenerateJsonDecode(Printer* printer);
-    virtual bool GenerateAutoFillC(Printer* printer, bool full_fill=false);
-    virtual bool GenerateAutoFillCpp(Printer* printer, bool full_fill=false);
+    virtual bool GenerateAutoFillC(Printer* printer);
+    virtual bool GenerateAutoFillCpp(Printer* printer);
     virtual bool GenerateCompareCAndCpp(Printer* printer);
     virtual bool GenerateClear(Printer* printer);
     virtual bool GenerateSetWrited(Printer* printer);
@@ -41,8 +41,8 @@ protected:
     void GenerateReadMessage(const string& var_name,
                              const FieldDescriptor* field,
                              Printer* printer);
-    string GetFillOrFillFullCFuncName(bool full_fill);
-    string GetFillOrFillFullCppFuncName(bool full_fill);
+    string GetFillOrFillFullCFuncName();
+    string GetFillOrFillFullCppFuncName();
     
 protected:
     const FieldDescriptor* descriptor_;
@@ -58,8 +58,8 @@ public:
     virtual bool GenerateEncodeByteSizeLong(Printer* printer);
     virtual bool GenerateJsonEncode(Printer* printer);
     virtual bool GenerateDecode(Printer* printer);
-    virtual bool GenerateAutoFillC(Printer* printer, bool full_fill=false);
-    virtual bool GenerateAutoFillCpp(Printer* printer, bool full_fill=false);
+    virtual bool GenerateAutoFillC(Printer* printer);
+    virtual bool GenerateAutoFillCpp(Printer* printer);
     virtual bool GenerateCompareCAndCpp(Printer* printer);
     virtual bool GenerateClear(Printer* printer);
     virtual bool GenerateSetWrited(Printer* printer);
@@ -80,8 +80,8 @@ public:
     virtual bool GenerateStringTlog(Printer* printer);
     virtual bool GenerateJsonEncode(Printer* printer);
     virtual bool GenerateJsonDecode(Printer* printer);
-    virtual bool GenerateAutoFillC(Printer* printer, bool full_fill=false);
-    virtual bool GenerateAutoFillCpp(Printer* printer, bool full_fill=false);
+    virtual bool GenerateAutoFillC(Printer* printer);
+    virtual bool GenerateAutoFillCpp(Printer* printer);
     virtual bool GenerateCompareCAndCpp(Printer* printer);
     virtual bool GenerateClear(Printer* printer);
     virtual bool GenerateSetWrited(Printer* printer);

@@ -16,7 +16,6 @@ Generate(const FileDescriptor* file,
         const string& parameter, 
         GeneratorContext* generator_context, 
         string* error) const {
-    
     vector<string> params; 
     SplitStringUsing(parameter, ",", &params);
     bool generate_test = false;

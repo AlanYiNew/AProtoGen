@@ -47,8 +47,13 @@ foreach(PROTO_FILE ${PROTO_FILES})
 endforeach()
 
 foreach(PROTO_FILE ${PROTO_FILES})
-    string(REGEX REPLACE "[.]proto$" "_speed_test.cpp" SPEEDEST_SOURCE ${PROTO_FILE})
-    list(APPEND SPEEDEST_SOURCES ${SPEEDEST_SOURCE}) 
+    string(REGEX REPLACE "[.]proto$" "_speed_test.cpp" SPEEDTEST_SOURCE ${PROTO_FILE})
+    list(APPEND SPEEDTEST_SOURCES ${SPEEDTEST_SOURCE}) 
+endforeach()
+
+foreach(PROTO_FILE ${LIB_PROTO_FILES})
+    string(REGEX REPLACE "[.]proto$" "_speed_test.h" SPEEDTEST_LIB_SOURCE ${PROTO_FILE})
+    list(APPEND SPEEDTEST_LIB_SOURCES ${SPEEDTEST_LIB_SOURCE}) 
 endforeach()
 
 foreach(PROTO_FILE ${PROTO_FILES})
@@ -71,66 +76,102 @@ foreach(PROTO_FILE ${LIB_PROTO_FILES})
     list(APPEND LIB_PROTO_SOURCES ${OUTPUT_SOURCE}) 
 endforeach()
 
-file(GLOB SRC_FILES
-        *.cpp
+file(GLOB UNITTEST_MAIN_SRC_FILES
+        AConvertUnitTest.cpp
+        *.cc
+        *.h
+        )
+
+file(GLOB SPEEDTEST_MAIN_SRC_FILES
+        AConvertSpeedTest.cpp
         *.cc
         *.h
         )
 
 include_directories(${Protobuf_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROTO_PATH})
 include_directories(${LIB_PROTO_PATH})
 link_directories(${Protobuf_LIBRARY})
 link_directories(${Protobuf_INCLUDE_DIR})
 
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+	message("current platform: Linux ")
+    SET(ACONVERT_EXECUTABLE AConvert)
+    SET(PROTOC_EXECUTABLE protoc)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+	message("current platform: Windows ")
+    SET(ACONVERT_EXECUTABLE AConvert.exe)
+    SET(PROTOC_EXECUTABLE protoc.exe)
+    target_compile_options(FlatProtoUnitTest PRIVATE "/MTd$<$<CONFIG:Debug>:>")
+else()
+	message("current platform: unkonw ")
+endif()
 
-message(${CMAKE_BINARY_DIR}/flatproto/AConvert.exe)
+message(${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE})
 add_custom_command(OUTPUT ${OUTPUT_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${OUTPUT_JSON_SOURCES} 
                    PRE_BUILD
-                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe --flat_out=${PROTO_PATH}  -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
+                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE} --flat_out=${PROTO_PATH}  -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe
+                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE}
                    COMMENT ${COMMAND})
 
-add_custom_command(OUTPUT ${LIB_PROTO_CSOURCES}
+add_custom_command(OUTPUT ${LIB_PROTO_CSOURCES} ${SPEEDTEST_LIB_SOURCES}
                    PRE_BUILD
-                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe --flat_out=${LIB_PROTO_PATH} --flat_opt=test -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
+                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE} --flat_out=${LIB_PROTO_PATH} --flat_opt=test -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe
+                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE}
                    COMMENT ${COMMAND})
 
-add_custom_command(OUTPUT ${UNITEST_SOURCES} ${SPEEDEST_SOURCES}
+add_custom_command(OUTPUT ${UNITEST_SOURCES} ${SPEEDTEST_SOURCES}
                    PRE_BUILD
-                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe --flat_out=${PROTO_PATH} --flat_opt=test -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
+                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE} --flat_out=${PROTO_PATH} --flat_opt=test -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${PROTO_FILES} ${LIB_PROTO_SOURCES} ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe
+                   DEPENDS ${PROTO_FILES} ${LIB_PROTO_SOURCES} ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE}
                    COMMENT ${COMMAND})
 
 add_custom_command(OUTPUT ${ASSIGN_SOURCES}
                    PRE_BUILD
-                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe --flat_out=${PROTO_PATH} --flat_opt=assign -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
+                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE} --flat_out=${PROTO_PATH} --flat_opt=assign -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${PROTO_FILES} ${LIB_PROTO_SOURCES} ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe
+                   DEPENDS ${PROTO_FILES} ${LIB_PROTO_SOURCES} ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE}
                    COMMENT ${COMMAND})
 
 add_custom_command(OUTPUT ${LIBPROTO_ASSIGN_SOURCES}
                    PRE_BUILD
-                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe --flat_out=${LIB_PROTO_PATH} --flat_opt=assign -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
+                   COMMAND ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE} --flat_out=${LIB_PROTO_PATH} --flat_opt=assign -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/AConvert.exe
+                   DEPENDS ${LIB_PROTO_FILES} ${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE}
                    COMMENT ${COMMAND})
 
-# 将源代码添加到此项目的可执行文件。
-message(${UNITEST_SOURCES})
+add_custom_command(OUTPUT ${OUTPUT_PROTO_SOURCES}
+                   PRE_BUILD
+                   COMMAND ${Protobuf_LIBRARY}/${PROTOC_EXECUTABLE} --cpp_out=${PROTO_PATH} -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                   DEPENDS ${PROTO_FILES} ${Protobuf_LIBRARY}/${ACONVERT_EXECUTABLE}
+                   COMMENT ${COMMAND})
 
-add_executable(FlatProtoUnitTest ${LIBPROTO_ASSIGN_SOURCES} ${ASSIGN_SOURCES}  ${SRC_FILES} ${OUTPUT_SOURCES} ${OUTPUT_JSON_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${LIB_PROTO_CSOURCES} ${SPEEDEST_SOURCES} ${UNITEST_SOURCES} ${LIB_PROTO_CSOURCES} ${OUTPUT_PROTO_SOURCES} ${LIB_PROTO_SOURCES})
-target_link_libraries(FlatProtoUnitTest libprotobufd libprotocd libprotobuf-lited)
-target_compile_options(FlatProtoUnitTest PRIVATE "/MTd$<$<CONFIG:Debug>:>")
+add_custom_command(OUTPUT ${LIB_PROTO_SOURCES}
+                   PRE_BUILD
+                   COMMAND ${Protobuf_LIBRARY}/${PROTOC_EXECUTABLE} --cpp_out=${LIB_PROTO_PATH} -I${LIB_PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${LIB_PROTO_FILES}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                   DEPENDS ${LIB_PROTO_FILES} ${Protobuf_LIBRARY}/${PROTOC_EXECUTABLE}
+                   COMMENT ${COMMAND})
 
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET FlatProtoUnitTest PROPERTY CXX_STANDARD 14)
+add_executable(FlatProtoUnitTest ${LIB_PROTO_CSOURCES} ${OUTPUT_SOURCES} ${ASSIGN_SOURCES} ${LIBPROTO_ASSIGN_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${UNITEST_SOURCES} ${OUTPUT_PROTO_SOURCES} ${LIB_PROTO_SOURCES} ${UNITTEST_MAIN_SRC_FILES} ${OUTPUT_JSON_SOURCES})
+add_executable(FlatProtoSpeedTest ${LIB_PROTO_CSOURCES} ${OUTPUT_SOURCES} ${ASSIGN_SOURCES} ${LIBPROTO_ASSIGN_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${SPEEDTEST_SOURCES} ${SPEEDTEST_LIB_SOURCES}  ${OUTPUT_PROTO_SOURCES} ${LIB_PROTO_SOURCES} ${OUTPUT_JSON_SOURCES} ${SPEEDTEST_MAIN_SRC_FILES})
+
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+	message("current platform: Linux ")
+    target_link_libraries(FlatProtoUnitTest  protoc protobuf protobuf-lite pthread)
+    target_link_libraries(FlatProtoSpeedTest  protoc protobuf protobuf-lite pthread)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+	message("current platform: Windows ")
+    target_link_libraries(FlatProtoUnitTest libprotobuf libprotoc libprotobuf-lite)
+    target_link_libraries(FlatProtoSpeedTest libprotobuf libprotoc libprotobuf-lite)
+    target_compile_options(FlatProtoUnitTest PRIVATE "/MT$<$<CONFIG:Release>:>")
+    target_compile_options(FlatProtoSpeedTest PRIVATE "/MT$<$<CONFIG:Release>:>")
+else()
+	message("current platform: unkonw ")
 endif()
-
-
-

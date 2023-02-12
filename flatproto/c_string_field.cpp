@@ -51,9 +51,6 @@ bool  CStringFieldGenerator::
 GenerateEncode(Printer* printer) {
   if (IsBytes()) { 
       vars_["str_length"] =  vars_["param_var"] + "->" + vars_["array_num"];
-      if (GetFillFullExtOption(descriptor_)) {
-         vars_["str_length"] =  vars_["array_max"];
-      }
       PrintFillFullVarDefine(printer, &vars_, descriptor_);
   } else {
       vars_["str_length"] =  vars_["param_cached_size"] + "->" + vars_["field_name"];
@@ -83,9 +80,6 @@ bool CStringFieldGenerator::
 GenerateEncodeByteSizeLong(Printer* printer) {
   if (IsBytes()) { 
       vars_["str_length"] =  vars_["param_var"] + "->" + vars_["array_num"];
-     if (GetFillFullExtOption(descriptor_)) {
-         vars_["str_length"] =  vars_["array_max"];
-      }
       PrintFillFullVarDefine(printer, &vars_, descriptor_);
   } else {
       vars_["strlen"] = "strlen(" + vars_["non_null_ptr_to_name"] + ")";
@@ -218,9 +212,7 @@ GenerateJsonDecode(Printer* printer) {
                 "if(ret == false) return -3;\n"
                 "if (unescaped_str.size() > $array_max$) return -4;\n"
                 "memcpy($non_null_ptr_to_name$, unescaped_str.c_str(), unescaped_str.size());\n");
-        if (!GetFillFullExtOption(descriptor_)) {
-            printer->Print(vars_, "$param_var$->$array_num$ = unescaped_str.size();\n");
-        }
+        printer->Print(vars_, "$param_var$->$array_num$ = unescaped_str.size();\n");
     } 
 
     else {
@@ -276,10 +268,8 @@ GenerateReadString(const string& var_name,
                 "}\n"
                 "if (!input->ReadRaw($var_name$, length)) return -12;\n",
                 "var_name", var_name);
-        if (!GetFillFullExtOption(descriptor_)) {
-            printer->Print(vars_,
+        printer->Print(vars_,
                 "$param_var$->$array_num$ = length;\n");
-        } 
     }
     else {
         printer->Print(
@@ -344,13 +334,13 @@ GenerateRandomTail(Printer* printer) {
 }
 
 bool CStringFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool fill_full) {
+GenerateAutoFillC(Printer* printer) {
     printer->Print(vars_, "char tempArray[$array_max$] = {0};");
-    GenerateRandomHead(printer, fill_full || GetFillFullExtOption(descriptor_));
+    GenerateRandomHead(printer, false);
     printer->Print(vars_, 
       " tempArray[j] = tmp;\n");
     //TODO
-    if (IsBytes() && !GetFillFullExtOption(descriptor_)) {
+    if (IsBytes()) {
       printer->Print(vars_, 
         " $param_c_var$->$array_num$++;\n");
     }
@@ -362,8 +352,8 @@ GenerateAutoFillC(Printer* printer, bool fill_full) {
 
 
 bool CStringFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool fill_full) {
-    GenerateRandomHead(printer, fill_full || GetFillFullExtOption(descriptor_));
+GenerateAutoFillCpp(Printer* printer) {
+    GenerateRandomHead(printer, false);
     printer->Print(vars_, 
       "  $param_cpp_var$->mutable_$cpp_name$()->push_back(tmp);\n");
     /*
@@ -380,7 +370,7 @@ GenerateAutoFillCpp(Printer* printer, bool fill_full) {
 bool CStringFieldGenerator::
 GenerateCompareCAndCpp(Printer* printer) {
     if (IsBytes()) {
-        GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), true);
+        GenerateRepeatedSizeCompare(&vars_, printer, true);
     }
     else {
         GenerateStringSizeCompare(&vars_, printer);
@@ -404,13 +394,7 @@ GenerateAssignCToCpp(Printer* printer) {
     // 处理bytes类型
     if (IsBytes()) {
         // 长度字段为空, 按最大处理
-        if (GetFillFullExtOption(descriptor_)) {
-            printer->Print(vars_, ", $array_max$");
-        }
-        // 否则，按实际长度赋值
-        else {
-            printer->Print(vars_, ", $param_c_var$.$array_num$");
-        }
+        printer->Print(vars_, ", $param_c_var$.$array_num$");
     }
     printer->Print("));\n");
     return true;
@@ -424,10 +408,7 @@ GenerateAssignCppToC(Printer* printer) {
                 "int32_t $cpp_name$_len = (uint64_t)$param_cpp_var$.$cpp_name$().size() > sizeof($param_c_var$.$field_name$) ? "
                 "sizeof($param_c_var$.$field_name$) : $param_cpp_var$.$cpp_name$().size();\n"
                 "memcpy(&$param_c_var$.$c_name$, $param_cpp_var$.$cpp_name$().c_str(), $cpp_name$_len);\n");
-        // 对长度赋值
-        if (!GetFillFullExtOption(descriptor_)) {
-            printer->Print(vars_, "$param_c_var$.$array_num$ = $cpp_name$_len;\n");
-        }
+        printer->Print(vars_, "$param_c_var$.$array_num$ = $cpp_name$_len;\n");
     }
     else {
         printer->Print(vars_,
@@ -469,8 +450,8 @@ GenerateDecode(Printer* printer) {
 }
 
 bool COneOfStringFieldGenerator::   
-GenerateAutoFillC(Printer* printer, bool fill_full) {
-    GenerateRandomHead(printer, fill_full);
+GenerateAutoFillC(Printer* printer) {
+    GenerateRandomHead(printer, false);
     printer->Print(vars_, 
       " $param_c_var$->$oneof_var$.$c_name$[j] = tmp;\n");
     GenerateRandomTail(printer);
@@ -481,9 +462,9 @@ GenerateAutoFillC(Printer* printer, bool fill_full) {
 }
    
 bool COneOfStringFieldGenerator::   
-GenerateAutoFillCpp(Printer* printer, bool fill_full) {
+GenerateAutoFillCpp(Printer* printer) {
 
-    GenerateRandomHead(printer, fill_full);
+    GenerateRandomHead(printer, false);
     printer->Print(vars_, 
       "  $param_cpp_var$->mutable_$cpp_name$()->push_back(tmp);\n");
     GenerateRandomTail(printer);
@@ -496,7 +477,7 @@ GenerateAutoFillCpp(Printer* printer, bool fill_full) {
 bool COneOfStringFieldGenerator::   
 GenerateCompareCAndCpp(Printer* printer) {
     if (IsBytes()) {
-        GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), true);
+        GenerateRepeatedSizeCompare(&vars_, printer, true);
     }
     else {
         GenerateOneofStringSizeCompare(&vars_, printer);
@@ -582,9 +563,7 @@ GenerateDecode(Printer* printer) {
             "char* temp = &$param_var$->$field_name$[$size$][0];\n");
     GenerateReadString("temp", max_len_[1], printer);
     printer->Print(vars_, "$size$++;\n");
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
-    }
+    printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
     return true;
 }
 
@@ -784,47 +763,40 @@ GenerateJsonDecode(Printer* printer) {
   printer->Outdent();
   printer->Print("}\n");
 
-  if (!GetFillFullExtOption(descriptor_)) {
-      printer->Print(vars_, "$param_var$->$array_num$ = json_value.Size();\n");
-  }
+  printer->Print(vars_, "$param_var$->$array_num$ = json_value.Size();\n");
   return true;
 }
 
     
 bool CRepeatedStringFieldGenerator::   
-GenerateAutoFillC(Printer* printer, bool full_fill) {
+GenerateAutoFillC(Printer* printer) {
     vars_["array_max"] = max_len_[0];
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+    GenerateAutoFillIterationHead(&vars_, printer);
     vars_["array_max"] = max_len_[1];
     printer->Print(vars_,
         "char arrayTemp[$array_max$] = {0};\n");
     printer->Indent();
-    GenerateRandomHead(printer, full_fill || GetFillFullExtOption(descriptor_));
+    GenerateRandomHead(printer, false);
     printer->Print(vars_,
         "   arrayTemp[j] = tmp;\n");
 
     GenerateRandomTail(printer);
     printer->Print(vars_,
         "  $param_c_var$->add_$cpp_name$(arrayTemp);\n");
-    //TODO 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, 
-                "$param_c_var$->$array_num$++;\n");
-    }
     printer->Outdent();
     GenerateAutoFillIterationTail(&vars_, printer);
     return true;
 }
     
 bool CRepeatedStringFieldGenerator::   
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
+GenerateAutoFillCpp(Printer* printer) {
     vars_["array_max"] = max_len_[0];
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Print(vars_,
       "  $param_cpp_var$->add_$cpp_name$();\n");
     printer->Indent();
     vars_["array_max"] = max_len_[1];
-    GenerateRandomHead(printer, full_fill || GetFillFullExtOption(descriptor_));
+    GenerateRandomHead(printer, false);
     printer->Print(vars_, 
       "  $param_cpp_var$->mutable_$cpp_name$(i)->push_back(tmp);\n");
     GenerateRandomTail(printer);
@@ -836,7 +808,7 @@ GenerateAutoFillCpp(Printer* printer, bool full_fill) {
 bool CRepeatedStringFieldGenerator::   
 GenerateCompareCAndCpp(Printer* printer) {
 
-    GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), false);
+    GenerateRepeatedSizeCompare(&vars_, printer,false);
     printer->Print(vars_, 
       "for (int i = 0; i < $param_cpp_var$->$cpp_name$_size(); i++) {\n"
       "  if (0 != memcmp($param_cpp_var$->$cpp_name$(i).c_str(),\n"
@@ -853,15 +825,9 @@ GenerateCompareCAndCpp(Printer* printer) {
 bool CRepeatedStringFieldGenerator::   
 GenerateAssignCToCpp(Printer* printer) {
 
-    // 没有数组长度字段, 则全复制
-    if (GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, 
-                "for (uint32_t i = 0; i < $array_max$; i++) {\n");
-    }
-    else {
-        printer->Print(vars_, 
-                "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
-    }
+
+    printer->Print(vars_, 
+            "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
     printer->Indent();
     printer->Print(vars_, 
             "$param_cpp_var$.add_$cpp_name$($param_c_var$.$cpp_name$(i));\n");
@@ -898,9 +864,7 @@ GenerateAssignCppToC(Printer* printer) {
     }
 
     // 有长度字段 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_c_var$.$array_num$ = i+1;\n");
-    } 
+    printer->Print(vars_, "$param_c_var$.$array_num$ = i+1;\n");
     printer->Outdent();
     printer->Print("}\n");
     return true;

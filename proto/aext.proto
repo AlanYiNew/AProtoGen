@@ -1,0 +1,25 @@
+syntax = "proto3";
+import "google/protobuf/descriptor.proto";
+package AExt;
+
+extend google.protobuf.OneofOptions {
+    string select = 1001; //  union select
+}
+
+extend google.protobuf.FieldOptions {
+    string count = 1001; //repeated 元素个数
+    string size = 1002; //数组长度
+    string refer = 1004;  
+    string oneof_id = 1005; // union field value
+    string c_type = 1006; // C结构类型
+}
+
+extend google.protobuf.EnumValueOptions {
+    string col_name = 1001;         // cname
+}
+
+extend google.protobuf.MessageOptions {
+    string file_name = 1001;         // filename
+    string xlsx_name = 1002;         // xlsxname
+    string sheet_name = 1003;        // sheet_name
+}

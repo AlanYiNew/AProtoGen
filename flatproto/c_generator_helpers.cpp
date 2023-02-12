@@ -1,5 +1,5 @@
 ﻿#include "c_generator_helpers.h"
-#include "pbc_extension.pb.h"
+#include "aext.pb.h"
 #include <google/protobuf/stubs/strutil.h>
 #include "c_helper.h"
 
@@ -202,9 +202,6 @@ string GetCArrayLenVarName(const FieldDescriptor* descriptor, bool fill_true) {
         //GOOGLE_LOG(INFO) << "array use field name=" <<  array_use_field;
         return array_use_field;
     } else if(IsBytes(descriptor) || IsRepeated(descriptor)) {
-        // 检查fill_true选项
-        if (fill_true && GetFillFullExtOption(descriptor->options()))
-            return "";
         return GetCArrayLenVarNameDefault(descriptor);
     }
     return "";
@@ -218,13 +215,12 @@ bool NeedGenerateArrayLenField(const FieldDescriptor* descriptor) {
     string array_use_field;
     return  (IsRepeated(descriptor) || IsBytes(descriptor)) 
             && (descriptor->containing_oneof() == NULL)
-            && (!GetFillFullExtOption(descriptor->options()) && 
-                    !GetArrayUseFieldName(descriptor->options(), array_use_field));
+            && (!GetArrayUseFieldName(descriptor->options(), array_use_field));
 }
 
 bool GetArrayUseFieldName(const FieldOptions& options, string& name){
-    if (options.HasExtension(PBCExt::refer)) {
-        name = options.GetExtension(PBCExt::refer);
+    if (options.HasExtension(AExt::refer)) {
+        name = options.GetExtension(AExt::refer);
         return true;
     }
     return false;
@@ -246,39 +242,37 @@ bool GetMaxLen(const FieldOptions& options, vector<string>&  max_len){
         }
     }
     */
-    if (options.HasExtension(PBCExt::max_len_1)) {
+    if (options.HasExtension(AExt::count)) {
         vector<string> names;
-        string name =  options.GetExtension(PBCExt::max_len_1);
+        string name =  options.GetExtension(AExt::count);
         SplitStringUsing(name, "::", &names);
         if (names.size() > 1) {
             JoinStrings(names, "_", &name);
             max_len.push_back(ToUpper(name));
         }
         else {
-            max_len.push_back(options.GetExtension(PBCExt::max_len_1));
+            max_len.push_back(options.GetExtension(AExt::count));
         }
     }
-    if (options.HasExtension(PBCExt::max_len_2)) {
+    if (options.HasExtension(AExt::size)) {
         vector<string> names;
-        string name =  options.GetExtension(PBCExt::max_len_2);
+        string name =  options.GetExtension(AExt::size);
         SplitStringUsing(name, "::", &names);
         if (names.size() > 1) {
             JoinStrings(names, "_", &name);
             max_len.push_back(ToUpper(name));
         }
         else {
-            max_len.push_back(options.GetExtension(PBCExt::max_len_2));
+            max_len.push_back(options.GetExtension(AExt::size));
         }
     }
-    if (options.HasExtension(PBCExt::max_len_3)) {
-        max_len.push_back(SimpleItoa(options.GetExtension(PBCExt::max_len_3)));
-    }
+    
     return max_len.size() > 0;
 }
 
 bool GetOneOfUseFieldName(const OneofOptions& options, string& name) {
-    if (options.HasExtension(PBCExt::select)) {
-        name = options.GetExtension(PBCExt::select);
+    if (options.HasExtension(AExt::select)) {
+        name = options.GetExtension(AExt::select);
         return true;
     }
     return false;
@@ -293,8 +287,8 @@ string GetCUnionEnumFieldName(const FieldDescriptor* descriptor) {
 }
     
 bool GetOneOfFieldValueName(const FieldOptions& options, string& name) {
-    if (options.HasExtension(PBCExt::oneof_id)) {
-        name = options.GetExtension(PBCExt::oneof_id);
+    if (options.HasExtension(AExt::oneof_id)) {
+        name = options.GetExtension(AExt::oneof_id);
         return true;
     }
     return false;
@@ -544,8 +538,8 @@ string GetPrimitiveTypeJsonType(const FieldDescriptor* field) {
 
 
 bool GetCTypeName(const FieldOptions& options, string& name)  {
-    if (options.HasExtension(PBCExt::c_type)) {
-        name = options.GetExtension(PBCExt::c_type);
+    if (options.HasExtension(AExt::c_type)) {
+        name = options.GetExtension(AExt::c_type);
         return true;
     }
     return false;
@@ -710,22 +704,6 @@ string GetFillCppFuncName(const FieldDescriptor * field) {
 string GetFillCppFuncName(const Descriptor * descriptor) {
     return "Fill" + descriptor->name();
 }
-
-string GetFillFullCFuncName(const FieldDescriptor * field) {
-    return GetFillFullCFuncName(field->containing_type());
-}
-string GetFillFullCFuncName(const Descriptor * descriptor) {
-    return "Fill" + GetCStructName(descriptor) + "Full";
-}
-
-string GetFillFullCppFuncName(const FieldDescriptor * field) {
-    return GetFillFullCppFuncName(field->containing_type());
-}
-
-string GetFillFullCppFuncName(const Descriptor * descriptor) {
-    return "Fill" + descriptor->name() + "Full";
-}
-
 
 string GetCompareCAndCppFuncName(const FieldDescriptor * field) {
     return GetCompareCAndCppFuncName(field->containing_type());
@@ -921,18 +899,6 @@ int FixedSize(FieldDescriptor::Type type)
     return -1;
 }
 
-bool GetFillFullExtOption(const FieldDescriptor* field) {
-    //if (!options.HasExtension(PBCExtension::fill_full))
-    //return false;
-    return field->options().GetExtension(PBCExt::fill_full);
-}
-
-bool GetFillFullExtOption(const FieldOptions& options) {
-    //if (!options.HasExtension(PBCExtension::fill_full))
-    //return false;
-    return options.GetExtension(PBCExt::fill_full);
-}
-
 void PrintErrorLog(Printer* printer, std::string fmt) {
     printer->Print(
             "#ifdef ENABLE_PB_LOG\n"
@@ -1003,83 +969,42 @@ void PrintCheckArraySize(Printer* printer, map<string, string>* vars, const Fiel
 }
 void PrintFillFullVarDefine(Printer* printer, map<string, string>* vars, const FieldDescriptor* field)
 {
-    if (GetFillFullExtOption(field)) {
-        printer->Print(*vars, 
-                "int32_t count = static_cast<int32_t>($array_max$);\n");
-    }
-    else {
-        printer->Print(*vars, 
-                "int32_t count = static_cast<int32_t>($param_var$->$array_num$);\n");
-    }
+    printer->Print(*vars, 
+            "int32_t count = static_cast<int32_t>($param_var$->$array_num$);\n");
     PrintCheckArraySize(printer, vars, field);
 }
 
 void PrintFillFullVarDefineWithBrace(Printer* printer, map<string, string>* vars, const FieldDescriptor* field)
 {
-    if (GetFillFullExtOption(field)) {
-        printer->Print(*vars,
-                "{\n"
-                "  const int count = $array_max$;\n");
-    }
-    else {
-        printer->Print(*vars,
-                "if($param_var$->$array_num$ != 0) {\n"
-                "  const int count = $param_var$->$array_num$;\n");
-    }
+
+    printer->Print(*vars,
+            "if($param_var$->$array_num$ != 0) {\n"
+            "  const int count = $param_var$->$array_num$;\n");
     printer->Indent();
     PrintCheckArraySize(printer, vars, field);
 }
 
 void PrintFillFullVarDefineWithBraceJson(Printer* printer, map<string, string>* vars, const FieldDescriptor* field)
 {
-    if (GetFillFullExtOption(field)) {
-        printer->Print(*vars,
-                "{\n"
-                "  const int count = $array_max$;\n");
-    }
-    else {
-        printer->Print(*vars,
-                "if($param_var$->$array_num$ > 0 || json_print_option.always_print_primitive_fields) {\n"
-                "  const int count = $param_var$->$array_num$;\n");
-    }
+
+    printer->Print(*vars,
+            "if($param_var$->$array_num$ > 0 || json_print_option.always_print_primitive_fields) {\n"
+            "  const int count = $param_var$->$array_num$;\n");
     printer->Indent();
     PrintCheckArraySize(printer, vars, field);
 }
 
 void PrintJsonAddMember(Printer* printer, map<string, string>* vars)
 {
-    if((*vars)["json_name"] == (*vars)["field_name"]) {
+    if((*vars)["json_name"] == (*vars)["c_name"]) {
         printer->Print(*vars,
-                    "document->AddMember(\"$field_name$\", json_value , *allocator);\n");
+                    "document->AddMember(\"$c_name$\", json_value , *allocator);\n");
     } else {
         printer->Print(*vars,
                     "if (json_print_option.preserve_proto_field_names) {\n"
-                    "  document->AddMember(\"$field_name$\", json_value , *allocator);\n"
+                    "  document->AddMember(\"$c_name$\", json_value , *allocator);\n"
                     "} else {\n"
                     "  document->AddMember(\"$json_name$\", json_value , *allocator);\n"
                     "}\n");
     }
-}
-
-bool GetNeedToPrintTlogString(const Descriptor* field)
-{
-    return field->options().GetExtension(PBCExt::print_tlog_string);
-}
-
-bool GetNeedToPrintOneofFieldName(const Descriptor* field)
-{
-    return field->options().GetExtension(PBCExt::print_oneof_field_name);
-}
-
-bool GetNeedToPrintAsDateTimeForm(const FieldDescriptor* field)
-{
-    if(field->options().HasExtension(PBCExt::tdr_type) && field->options().GetExtension(PBCExt::tdr_type) == "datetime") {
-        if(field->cpp_type() == google::protobuf::FieldDescriptor::CPPTYPE_INT32) {
-            return true;
-        }    
-        else {
-            GOOGLE_LOG(ERROR) << field->name() << " datetime need to be of type CPPTYPE_INT32"; 
-        }
-    }
-    return false;
 }

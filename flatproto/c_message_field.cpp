@@ -268,7 +268,7 @@ GenerateJsonDecode(Printer* printer) {
             "rapidjson::Document sub_message_document;\n"
             "sub_message_document.SetObject();\n"
             "json_value.Swap(sub_message_document);\n"
-            "int32_t ret = $json_func_name$(&sub_message_document, &$non_null_ptr_to_name$, json_parse_option);\n"
+            "int32_t ret = $json_func_name$(&sub_message_document, $param_var$->mutable_$c_name$(), json_parse_option);\n"
             "if (ret != 0) return ret;\n");
     printer->Outdent();
     printer->Print("}\n");
@@ -277,8 +277,8 @@ GenerateJsonDecode(Printer* printer) {
 
 
 bool CMessageFieldGenerator::
-GenerateAutoFillC(Printer* printer, bool full_fill) {
-  vars_["fill_fun"] = GetFillOrFillFullCFuncName(full_fill);
+GenerateAutoFillC(Printer* printer) {
+  vars_["fill_fun"] = GetFillOrFillFullCFuncName();
   printer->Print(vars_, 
           "if (random()%2) {\n"
           "  $fill_fun$($param_c_var$->mutable_$cpp_name$());\n"
@@ -287,8 +287,8 @@ GenerateAutoFillC(Printer* printer, bool full_fill) {
 }
 
 bool CMessageFieldGenerator::
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
-  vars_["fill_fun"] = GetFillOrFillFullCppFuncName(full_fill);
+GenerateAutoFillCpp(Printer* printer) {
+  vars_["fill_fun"] = GetFillOrFillFullCppFuncName();
   printer->Print(vars_, 
     "if (random()%2) {\n"
     "  $fill_fun$($param_cpp_var$->mutable_$cpp_name$());\n"
@@ -359,18 +359,12 @@ GenerateSetWrited(Printer* printer) {
 
 
 string CMessageFieldGenerator::
-GetFillOrFillFullCFuncName(bool full_fill) {
-  if(full_fill) {
-    return GetFillFullCFuncName(descriptor_->message_type());
-  }
+GetFillOrFillFullCFuncName() {
   return GetFillCFuncName(descriptor_->message_type());
 }
 
 string CMessageFieldGenerator::
-GetFillOrFillFullCppFuncName(bool full_fill) {
-  if(full_fill) {
-    return GetFillFullCppFuncName(descriptor_->message_type());
-  }
+GetFillOrFillFullCppFuncName() {
   return GetFillCppFuncName(descriptor_->message_type());
 }
 
@@ -386,8 +380,8 @@ GenerateJsonEncode(Printer* printer) {
 }
 
 bool COneofMessageFieldGenerator::   
-GenerateAutoFillC(Printer* printer, bool full_fill) {
-  vars_["fill_fun"] = GetFillOrFillFullCFuncName(full_fill);
+GenerateAutoFillC(Printer* printer) {
+  vars_["fill_fun"] = GetFillOrFillFullCFuncName();
   printer->Print(vars_,
       "$fill_fun$($param_c_var$->mutable_$cpp_name$());\n");
   return true;
@@ -422,8 +416,8 @@ GenerateDecode(Printer* printer) {
 }
 
 bool COneofMessageFieldGenerator::   
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
-  vars_["fill_fun"] = GetFillOrFillFullCppFuncName(full_fill);
+GenerateAutoFillCpp(Printer* printer) {
+  vars_["fill_fun"] = GetFillOrFillFullCppFuncName();
   printer->Print(vars_, 
           "$fill_fun$($param_cpp_var$->mutable_$cpp_name$());\n"
           "$param_cpp_var$->$cpp_oneof_use_var$($oneof_field_value$);\n"); 
@@ -507,9 +501,7 @@ GenerateDecode(Printer* printer) {
             "memset(temp, 0, sizeof(*temp));\n");
     GenerateReadMessage("temp", descriptor_, printer);   
     printer->Print(vars_, "$size$++;\n");
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
-    }
+    printer->Print(vars_, "$param_var$->$array_num$ = $size$;\n");
 
     return true;
 }
@@ -706,37 +698,31 @@ GenerateJsonDecode(Printer* printer) {
         "   int32_t ret = $json_func_name$(&sub_message_document, &$param_var$->$field_name$[i], json_parse_option);\n"
         "   if (ret != 0) return ret;\n"
         "}\n");
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_,
-                "$param_var$->$array_num$ = json_value.Size();\n");
-    }
+    printer->Print(vars_,
+        "$param_var$->$array_num$ = json_value.Size();\n");
     printer->Outdent();
     printer->Print("}\n");
   return true;
 }
 
 bool CRepeatedMessageFieldGenerator::   
-GenerateAutoFillC(Printer* printer, bool full_fill) {
-    vars_["fill_fun"] = GetFillOrFillFullCFuncName(full_fill);
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_c_var$->$array_num$ = 0;\n");
-    }
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+GenerateAutoFillC(Printer* printer) {
+    vars_["fill_fun"] = GetFillOrFillFullCFuncName();
+    printer->Print(vars_, "$param_c_var$->$array_num$ = 0;\n");
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     printer->Print(vars_, 
       "$fill_fun$($param_c_var$->mutable_$cpp_name$(i));\n");
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "$param_c_var$->$array_num$++;\n");
-    }
+    printer->Print(vars_, "$param_c_var$->$array_num$++;\n");
     printer->Outdent();
     GenerateAutoFillIterationTail(&vars_, printer);
     return true;
 }
     
 bool CRepeatedMessageFieldGenerator::   
-GenerateAutoFillCpp(Printer* printer, bool full_fill) {
-    vars_["fill_fun"] = GetFillOrFillFullCppFuncName(full_fill);
-    GenerateAutoFillIterationHead(&vars_, printer, full_fill || GetFillFullExtOption(descriptor_));
+GenerateAutoFillCpp(Printer* printer) {
+    vars_["fill_fun"] = GetFillOrFillFullCppFuncName();
+    GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     printer->Print(vars_, 
       "$fill_fun$($param_cpp_var$->add_$cpp_name$());\n");
@@ -751,7 +737,7 @@ GenerateAutoFillCpp(Printer* printer, bool full_fill) {
     
 bool CRepeatedMessageFieldGenerator::   
 GenerateCompareCAndCpp(Printer* printer) {
-    GenerateRepeatedSizeCompare(&vars_, printer, GetFillFullExtOption(descriptor_), false);
+    GenerateRepeatedSizeCompare(&vars_, printer, false);
     printer->Print(vars_,
       "for (int32_t i = 0; i < $param_cpp_var$->$cpp_name$_size(); i++) {\n"
       "  if (!$compare_fun$(&$param_c_var$->$c_name$[i],\n"
@@ -778,13 +764,9 @@ GenerateClear(Printer* printer) {
 bool CRepeatedMessageFieldGenerator::
 GenerateSetWrited(Printer* printer) {
 
-    if(GetFillFullExtOption(descriptor_)) {
-      printer->Print(vars_,
-          "int32_t $c_name$_max = $array_max$;\n");
-    } else {
-      printer->Print(vars_,
-          "int32_t $c_name$_max = $param_var$->$array_num$;\n");
-    }
+    
+    printer->Print(vars_,
+      "int32_t $c_name$_max = $param_var$->$array_num$;\n");
     printer->Print(vars_, 
       "for (int32_t i = 0; i < $c_name$_max; i++) {\n"
       "  $set_writed_func_name$(&$non_null_ptr_to_name$[i]);\n"
@@ -795,12 +777,7 @@ GenerateSetWrited(Printer* printer) {
 bool CRepeatedMessageFieldGenerator::
 GenerateAssignCToCpp(Printer* printer) {
     // 数组长度字段不为空 
-    if (!GetFillFullExtOption(descriptor_)) {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
-    }
-    else {
-        printer->Print(vars_, "for (uint32_t i = 0; i < $array_max$; i++) {\n");
-    }
+    printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
     printer->Indent();
     printer->Print(vars_, 
             "if (!$c_2_cpp_fun$($param_c_var$.$c_name$[i], *$param_cpp_var$.add_$cpp_name$())) return false;\n");

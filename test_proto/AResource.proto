@@ -1,6 +1,6 @@
 syntax="proto3";
 package Res;
-import "pbc_extension.proto";
+import "aext.proto";
 
 message Inner {
     int32 temp = 1;
@@ -15,7 +15,7 @@ enum NumVal {
 message helloworld
 {
     int32 id = 1;       // ID
-    string str = 2[(PBCExt.max_len_1) = "20"];     // str
+    string str = 2[(AExt.count) = "2"];     // str
     int32 opt = 3;      //optional field
     Inner inner1 = 4;// temp
     Inner inner2 = 5;// temp
@@ -27,14 +27,14 @@ message helloworld
     Inner inner8 = 11;// temp
     
     oneof object {
-        option (PBCExt.select) = "id";
-		float a  = 12[(PBCExt.oneof_id) = "NUMVAL0"];
-		uint32 b = 13[(PBCExt.oneof_id) = "NUMVAL1"];
-        Inner c = 14[(PBCExt.oneof_id) = "NUMVAL2"];
+        option (AExt.select) = "id";
+		float a  = 12[(AExt.oneof_id) = "NUMVAL0"];
+		uint32 b = 13[(AExt.oneof_id) = "NUMVAL1"];
+        Inner c = 14[(AExt.oneof_id) = "NUMVAL2"];
 	}
 
-    repeated string stringList = 15[(PBCExt.max_len_1) = "10", (PBCExt.max_len_2) = "20"];
-    repeated NumVal enumValList = 16[(PBCExt.max_len_1) = "1"];
+    repeated string stringList = 15[(AExt.count) = "5", (AExt.size) = "3"];
+    repeated NumVal enumValList = 16[(AExt.count) = "5"];
     NumVal enumVal = 17;
 }
 
