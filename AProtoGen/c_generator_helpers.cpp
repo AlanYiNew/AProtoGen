@@ -181,13 +181,14 @@ string GetCStructUnionSelectVarName(const OneofDescriptor* descriptor) {
     SplitStringUsing(name, ".", &res);
     if (res.size() <= 1) return GetMessageFieldAccessFuncName(name);
 
-    for (size_t i = 0; i < res.size(); i++)
+    for (size_t i = 0; i < res.size()-1; i++)
     {
         res[i] = GetMessageFieldAccessFuncName(res[i]);
     }
+    res[res.size() - 1] = GetMessageFieldName(res[res.size() - 1]);
 
     std::string result;
-    JoinStrings(res, ".", &result);
+    JoinStrings(res, "->", &result);
     return result;
 }
 
@@ -210,7 +211,7 @@ string GetCStructUnionSelectFieldName(const OneofDescriptor* descriptor) {
     res[res.size() - 1] = GetMessageFieldName(res[res.size() - 1]);
 
     std::string result;
-    JoinStrings(res, ".", &result);
+    JoinStrings(res, "->", &result);
     return result;
 }
 
