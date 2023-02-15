@@ -268,7 +268,7 @@ GenerateJsonDecode(Printer* printer) {
             "rapidjson::Document sub_message_document;\n"
             "sub_message_document.SetObject();\n"
             "json_value.Swap(sub_message_document);\n"
-            "int32_t ret = $json_func_name$(&sub_message_document, $param_var$->mutable_$c_name$(), json_parse_option);\n"
+            "int32_t ret = $json_func_name$(&sub_message_document, $param_var$->$mutable_func$(), json_parse_option);\n"
             "if (ret != 0) return ret;\n");
     printer->Outdent();
     printer->Print("}\n");
