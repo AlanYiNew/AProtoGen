@@ -50,9 +50,10 @@ bool NeedGenerateArrayLenField(const FieldDescriptor* descriptor);
 bool GetStrictFlat(const FileDescriptor* file);
 // 获取message字段访问接口名字
 std::string GetMessageFieldAccessFuncName(const FieldDescriptor* descriptor);
-std::string GetMessageFieldAccessFuncName(const std::string field_name);
+std::string GetMessageFieldAccessFuncName(const std::string& field_name);
 // 获取message字段可改变访口名字
 std::string GetMessageFieldMutableFuncName(const FieldDescriptor* descriptor);
+std::string GetMessageFieldMutableFuncName(const std::string& field_name);
 // 获取message字段成员名字
 std::string GetMessageFieldName(const FieldDescriptor* descriptor);
 std::string GetMessageFieldName(const std::string field_name);

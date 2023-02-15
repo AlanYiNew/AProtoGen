@@ -18,7 +18,12 @@ bool GetStrictFlat(const FileDescriptor* file)
 
 std::string GetMessageFieldMutableFuncName(const FieldDescriptor* descriptor)
 {
-    return "mutable_" + GetMessageFieldAccessFuncName(descriptor->name());
+    return GetMessageFieldMutableFuncName(descriptor->name());
+}
+
+std::string GetMessageFieldMutableFuncName(const std::string& field_name)
+{
+    return "mutable_" + GetMessageFieldAccessFuncName(field_name);
 }
 
 std::string GetMessageFieldAccessFuncName(const FieldDescriptor* descriptor)
@@ -26,7 +31,7 @@ std::string GetMessageFieldAccessFuncName(const FieldDescriptor* descriptor)
     return GetMessageFieldAccessFuncName(descriptor->name());  
 }
 
-std::string GetMessageFieldAccessFuncName(const std::string field_name)
+std::string GetMessageFieldAccessFuncName(const std::string& field_name)
 {
     std::string ret = field_name;
     LowerString(&ret);
@@ -200,9 +205,9 @@ string GetCStructUnionSelectFieldName(const OneofDescriptor* descriptor) {
 
     for (size_t i = 0; i < res.size()-1; i++)
     {
-        res[i] = GetMessageFieldAccessFuncName(res[i]) + "()";
+        res[i] = GetMessageFieldMutableFuncName(res[i]) + "()";
     }
-    res[res.size() - 1] = GetMessageFieldName(res[res.size() - 1]);
+    res[res.size() - 1] = GetMessageFieldMutableFuncName(res[res.size() - 1]);
 
     std::string result;
     JoinStrings(res, ".", &result);
