@@ -23,3 +23,7 @@ extend google.protobuf.MessageOptions {
     string xlsx_name = 1002;         // xlsxname
     string sheet_name = 1003;        // sheet_name
 }
+
+extend google.protobuf.FileOptions {
+    bool strict_flat = 10001;
+}

@@ -1,0 +1,43 @@
+syntax="proto3";
+import "aext.proto";
+package Protocol;
+
+message Inner {
+    int32 temp = 1;
+    string str = 2[(AExt.size) = "3"];
+}
+
+enum NumVal {
+    NumVal0 = 0;
+    NumVal1 = 1;
+    NumVal2 = 2;
+    NumVal3 = 4;
+}
+
+message helloworld
+{
+    int32 id = 1;       // ID
+    string str = 2[(AExt.size) = "2"];     // str
+    int32 opt = 3;      //optional field
+    Inner inner1 = 4;// temp
+    Inner inner2 = 5;// temp
+    Inner inner3 = 6;// temp
+    Inner inner4 = 7;// temp
+    Inner inner5 = 8;// temp
+    Inner inner6 = 9;// temp
+    Inner inner7 = 10;// temp
+    Inner inner8 = 11;// temp
+    
+    oneof object {
+        option (AExt.select) = "id";
+		float a  = 12[(AExt.oneof_id) = "NUMVAL0"];
+		uint32 b = 13[(AExt.oneof_id) = "NUMVAL1"];
+        Inner c = 14[(AExt.oneof_id) = "NUMVAL2"];
+        string d = 19[(AExt.oneof_id) = "NUMVAL3", (AExt.size) = "Protocol::NUMVAL2"];
+	}
+
+    repeated string stringList = 15[(AExt.count) = "5", (AExt.size) = "3"];
+    repeated NumVal enumValList = 16[(AExt.count) = "5"];
+    NumVal enumVal = 17;
+    repeated int32 intList = 18[(AExt.count) = "5"];
+}
