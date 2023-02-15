@@ -26,7 +26,7 @@ CMessageFieldGenerator(const FieldDescriptor* descriptor)
 bool CMessageFieldGenerator::
 GenerateClear(Printer* printer) {
     printer->Print(vars_, 
-            "$clear_func_name$(&$param_var$->$mutable_func$());\n"
+            "$clear_func_name$($param_var$->$mutable_func$());\n"
             "$param_var$->$clear_has_func$();\n");
     return true;
 }
@@ -34,7 +34,7 @@ GenerateClear(Printer* printer) {
 bool CMessageFieldGenerator::
 GenerateSetWrited(Printer* printer) {
     printer->Print(vars_, 
-            "$set_writed_func_name$(&$param_var$->$mutable_func$());\n");
+            "$set_writed_func_name$($param_var$->$mutable_func$());\n");
     return true;
 }
 
