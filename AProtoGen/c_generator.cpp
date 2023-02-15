@@ -294,6 +294,7 @@ GenerateUnionFieldFunc(int index, const FieldDescriptor* descriptor, Printer& pr
     map<string, string> vars;
     vars["union_type_name"] = GetCUnionName(descriptor->containing_oneof());
     vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(descriptor->containing_oneof());
+    vars["one_of_select_fieldname_read"] = GetCStructUnionSelectVarName(descriptor->containing_oneof());
     vars["union_field_name"] = GetCStructUnionFieldVarName(descriptor->containing_oneof());
     vars["name"] = GetMessageFieldName(descriptor);
     vars["msgname"] = GetCStructName(descriptor->message_type());
@@ -323,7 +324,7 @@ GenerateUnionFieldFunc(int index, const FieldDescriptor* descriptor, Printer& pr
 
     printer.Print(vars, "inline int $has_func$() const{\n");
     printer.Indent();
-    printer.Print(vars, "return $one_of_select_fieldname$ == $oneof_id$;\n");
+    printer.Print(vars, "return $one_of_select_fieldname_read$ == $oneof_id$;\n");
     printer.Outdent();
     printer.Print("}\n");
 
@@ -346,6 +347,7 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
     //有oneof选项的字段
     if (descriptor->containing_oneof() != NULL) {
         vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(descriptor->containing_oneof());
+        vars["one_of_select_fieldname_read"] = GetCStructUnionSelectVarName(descriptor->containing_oneof());
         vars["union_field_name"] = GetCStructUnionFieldVarName(descriptor->containing_oneof());
         vars["oneof_id"] = GetCUnionFieldIDName(descriptor);
         // set_xxxx()
@@ -363,7 +365,7 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         printer.Print(vars, "inline bool $has_func$() const{\n");
         printer.Indent();
         printer.Print(vars,
-            "return $one_of_select_fieldname$ == $oneof_id$;\n");
+            "return $one_of_select_fieldname_read$ == $oneof_id$;\n");
         printer.Outdent();
         printer.Print("}\n");
 
@@ -670,6 +672,7 @@ void CGenerator::GenerateFieldOneOfMessageFunc(const FieldDescriptor* descriptor
     if (IsMessage(descriptor)) {
         vars["union_type_name"] = GetCUnionName(descriptor->containing_oneof());
         vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(descriptor->containing_oneof());
+        vars["one_of_select_fieldname_read"] = GetCStructUnionSelectVarName(descriptor->containing_oneof());
         vars["union_field_name"] = GetCStructUnionFieldVarName(descriptor->containing_oneof());
         vars["name"] = GetMessageFieldName(descriptor);
         vars["msgname"] = GetCStructName(descriptor->message_type());
@@ -711,7 +714,7 @@ void CGenerator::GenerateFieldOneOfMessageFunc(const FieldDescriptor* descriptor
         // has_xxxx()
         printer.Print(vars, "inline int $has_func$() const{\n");
         printer.Indent();
-        printer.Print(vars, "return $one_of_select_fieldname$ == $oneof_id$;\n");
+        printer.Print(vars, "return $one_of_select_fieldname_read$ == $oneof_id$;\n");
         printer.Outdent();
         printer.Print("}\n");
 
@@ -827,6 +830,7 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
     //TODO TODO
     if (descriptor->containing_oneof() != NULL) {
         vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(descriptor->containing_oneof());
+        vars["one_of_select_fieldname_read"] = GetCStructUnionSelectVarName(descriptor->containing_oneof());
         vars["union_field_name"] = GetCStructUnionFieldVarName(descriptor->containing_oneof());
         vars["oneof_id"] = GetCUnionFieldIDName(descriptor);
         // set_xxxx()
@@ -848,7 +852,7 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Print(vars, "inline bool $has_func$() const{\n");
         printer.Indent();
         printer.Print(vars,
-            "return $one_of_select_fieldname$ == $oneof_id$;\n");
+            "return $one_of_select_fieldname_read$ == $oneof_id$;\n");
         printer.Outdent();
         printer.Print("}\n");
 

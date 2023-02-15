@@ -124,8 +124,10 @@ void SetCommVar(const FieldDescriptor* descriptor,
     if (oneof_descriptor) {
         (*vars)["oneof_var"] =
             GetCStructUnionFieldVarName(oneof_descriptor);
-        (*vars)["c_oneof_use_var"] =  
+        (*vars)["c_oneof_use_var_read"] =  
             GetCStructUnionSelectVarName(oneof_descriptor);
+        (*vars)["c_oneof_use_var"] =  
+            GetCStructUnionSelectFieldName(oneof_descriptor);
         (*vars)["cpp_oneof_use_var"] =  
             GetCppUnionFieldUseVarName(oneof_descriptor);
         (*vars)["oneof_field_value"] =

@@ -29,7 +29,7 @@ message helloworld
     Inner inner8 = 11;// temp
     
     oneof object {
-        option (AExt.select) = "id";
+        option (AExt.select) = "inner1.temp";
 		float a  = 12[(AExt.oneof_id) = "NUMVAL0"];
 		uint32 b = 13[(AExt.oneof_id) = "NUMVAL1"];
         Inner c = 14[(AExt.oneof_id) = "NUMVAL2"];

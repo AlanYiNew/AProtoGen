@@ -433,7 +433,7 @@ GenerateDecode(Printer* printer) {
             "&$param_var$->$oneof_var$.$field_name$[0];\n");
     GenerateReadString("temp", max_len_[0], printer);
     printer->Print(vars_, 
-            "if ($param_var$->$c_oneof_use_var$() != $oneof_field_value$) {\n");
+            "if ($param_var$->$c_oneof_use_var_read$ != $oneof_field_value$) {\n");
     printer->Indent();
     PrintErrorLog(printer, "oneof filed not match");
     printer->Print("return -10;\n");
@@ -456,7 +456,7 @@ GenerateAutoFillC(Printer* printer) {
     printer->Print(vars_, 
       " $param_c_var$->set_$cpp_name$(arrayTemp);\n");
     printer->Print(vars_,
-      "$param_c_var$->set_$c_oneof_use_var$($oneof_field_value$);\n");
+      "$param_c_var$->$c_oneof_use_var$ = $oneof_field_value$;\n");
     return true;
 }
    

@@ -204,7 +204,7 @@ GenerateDecode(Printer* printer) {
             "&$param_var$->$mutable_func$();\n");
     GenerateReadEnum("temp", descriptor_, printer);
     printer->Print(vars_, 
-            "if ($param_var$->$c_oneof_use_var$() != "
+            "if ($param_var$->$c_oneof_use_var_read$ != "
             "$oneof_field_value$) return -10;\n");
     return true;
 }

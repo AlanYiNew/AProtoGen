@@ -320,7 +320,7 @@ GenerateDecode(Printer* printer) {
             "&$param_var$->$oneof_var$.$field_name$;\n");
     GenerateReadPrimitive("temp", descriptor_, printer);
     printer->Print(vars_, 
-            "if ($param_var$->$c_oneof_use_var$() != $oneof_field_value$) {\n");
+            "if ($param_var$->$c_oneof_use_var$ != $oneof_field_value$) {\n");
     printer->Indent();
     PrintErrorLog(printer, "oneof filed not match");
     printer->Print("return -10;\n");

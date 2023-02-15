@@ -241,7 +241,7 @@ GenerateUnitTestCompareDefine(Printer* printer) {
             it != oneof_fields_.end(); ++it) {
         printer->Print("{\n");
         printer->Print(
-          "switch ($param_c_var$->$oneof_select$()) {\n", 
+          "switch ($param_c_var$->$oneof_select$) {\n", 
           "param_c_var", vars_["param_c_var"], 
           "oneof_select", GetCStructUnionSelectVarName(it->first));
         printer->Indent();
@@ -916,7 +916,7 @@ GenerateStringDefine(Printer* printer) {
     string enumfieldvalue;
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1015,7 +1015,7 @@ GenerateJsonDefineEncodeWithDocument(Printer* printer) {
     string enumfieldvalue;
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1172,7 +1172,7 @@ bool CMessageGenerator::GenerateSetWritedDefine(Printer* printer) {
     // 1、先处理oneof字段
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1218,7 +1218,7 @@ bool CMessageGenerator::GenerateClearDefine(Printer* printer)
     // 1、先处理oneof字段
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1352,7 +1352,7 @@ GenerateEncodeDefineWithCachedSize(Printer* printer) {
     string enumfieldvalue;
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1449,7 +1449,7 @@ GenerateEncodeDefineByteSizeLongWithCachedSize(Printer* printer) {
     string enumfieldvalue;
     for (int i = 0; i < descriptor_->oneof_decl_count(); i++) { 
         printer->Print(
-                "switch ($param_var$->$unionvarname$()) {\n",
+                "switch ($param_var$->$unionvarname$) {\n",
                 "unionvarname", GetCStructUnionSelectVarName(descriptor_->oneof_decl(i)),
                 "param_var", vars_["param_var"]);
         printer->Indent();
@@ -1517,7 +1517,7 @@ GenerateC2CppDefine(Printer* printer) {
             it != oneof_fields_.end(); ++it) {
         printer->Print("{\n");
         printer->Print(
-          "switch ($param_c_var$.$oneof_select$()) {\n", 
+          "switch ($param_c_var$.$oneof_select$) {\n", 
           "param_c_var", vars_["param_c_var"], 
           "oneof_select", GetCStructUnionSelectVarName(it->first));
         printer->Indent();
@@ -1580,9 +1580,9 @@ GenerateCpp2CDefine(Printer* printer) {
             CFieldGenerator* generator = field_genertors_.Get(field); 
             generator->GenerateAssignCppToC(printer);
             printer->Print(
-                    "$param_c_var$.set_$oneof_select$($field_id$);\n", 
+                    "$param_c_var$.$oneof_select$ = $field_id$;\n", 
                     "param_c_var", vars_["param_c_var"], 
-                    "oneof_select", GetCStructUnionSelectVarName(it->first),
+                    "oneof_select", GetCStructUnionSelectFieldName(it->first),
                     "field_id", GetCUnionFieldIDName(field));
             printer->Outdent();
             printer->Print("}\nbreak;\n");
