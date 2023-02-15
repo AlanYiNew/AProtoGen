@@ -207,7 +207,7 @@ string GetCStructUnionSelectFieldName(const OneofDescriptor* descriptor) {
     {
         res[i] = GetMessageFieldMutableFuncName(res[i]) + "()";
     }
-    res[res.size() - 1] = GetMessageFieldMutableFuncName(res[res.size() - 1]);
+    res[res.size() - 1] = GetMessageFieldName(res[res.size() - 1]);
 
     std::string result;
     JoinStrings(res, ".", &result);
