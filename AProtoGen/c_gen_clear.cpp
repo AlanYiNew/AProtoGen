@@ -24,7 +24,7 @@ Generate(const FileDescriptor* file,
     std::unique_ptr<io::ZeroCopyOutputStream> temp(generator_context->Open(base_name + "_clear.h"));
     Printer header_printer(temp.get(), '$');
     if (!generator_->GenerateClearHeader(&header_printer)) return false;
-    std::unique_ptr<io::ZeroCopyOutputStream> temp2(generator_context->Open(base_name + "_clear.c"));
+    std::unique_ptr<io::ZeroCopyOutputStream> temp2(generator_context->Open(base_name + "_clear.cpp"));
     Printer source_printer(temp2.get(), '$');
     if (!generator_->GenerateClearSource(&source_printer)) return false;
     return true;
