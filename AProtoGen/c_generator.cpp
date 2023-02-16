@@ -7,6 +7,7 @@
 #include <google/protobuf/stubs/logging.h>
 #include "c_generator_helpers.h"
 #include <sstream> 
+#include <set>
 #include <stdio.h> 
 
 CGenerator::CGenerator() {
@@ -217,10 +218,37 @@ GenerateStruct(const Descriptor* descriptor, Printer& printer) const {
     for (int i = 0; i < descriptor->field_count(); i++){
          GenerateStructFieldFunc(i, descriptor->field(i), printer);
     }
+    GenerateClearFunc(descriptor, printer);
 
     printer.Outdent();
     printer.Outdent();
     printer.Print(vars, "};\n");
+}
+
+void CGenerator::
+GenerateClearFunc(const Descriptor* descriptor, Printer& printer) const
+{
+    map<string, string> vars;
+    printer.Print(vars, "inline void clear() {\n");
+    printer.Indent();
+    set<string> cleared_one_of;
+    for (int i = 0; i < descriptor->field_count(); ++i) {
+         auto field_desc = descriptor->field(i);
+         if (field_desc->containing_oneof() != nullptr) {
+            const OneofDescriptor* one_of_desc = field_desc->containing_oneof();
+            if (cleared_one_of.find(one_of_desc->name()) != cleared_one_of.end()) {
+                continue;
+            }
+            cleared_one_of.insert(one_of_desc->name());
+            vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(field_desc->containing_oneof());
+            printer.Print(vars, "$one_of_select_fieldname$ = 0;\n");  
+        }   else {
+            vars["call_clear_func"] = GetMessageFieldHasFlagClearFuncName(descriptor->field(i));
+            printer.Print(vars, "$call_clear_func$();\n");
+        }
+    }
+    printer.Outdent();
+    printer.Print(vars, "}\n\n");
 }
 
 void CGenerator::
@@ -302,13 +330,12 @@ GenerateUnionFieldFunc(int index, const FieldDescriptor* descriptor, Printer& pr
     vars["mutable_func"] = GetMessageFieldMutableFuncName(descriptor);
     vars["has_func"] = GetMessageFieldHasFuncName(descriptor);
     vars["oneof_id"] = GetCUnionFieldIDName(descriptor);
-    
-    std::cout << vars["name"] << std::endl;
     vars["clear_has_func"] = GetMessageFieldHasFlagClearFuncName(descriptor);
     printer.Print(vars, "inline $msgname$* $mutable_func$() {\n");
     printer.Indent();
     printer.Print(vars,
         "if (!$has_func$()){\n"
+        "    $union_field_name$.$name$.clear();\n"
         "    $one_of_select_fieldname$ = $oneof_id$\n"
         "}\n"
         "return &$union_field_name$.$name$;\n");
@@ -343,6 +370,7 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
     vars["access_func"] = GetMessageFieldAccessFuncName(descriptor);
     vars["mutable_func"] = GetMessageFieldMutableFuncName(descriptor);
     vars["has_func"] = GetMessageFieldHasFuncName(descriptor);
+    vars["clear_has_func"] = GetMessageFieldHasFlagClearFuncName(descriptor);
    
     //有oneof选项的字段
     if (descriptor->containing_oneof() != NULL) {
@@ -374,6 +402,16 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         printer.Indent();
         printer.Print(vars,
             "return $union_field_name$.$name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "if ($has_func$()) {"
+            "   $one_of_select_fieldname$ = 0;\n"
+            "}");
         printer.Outdent();
         printer.Print("}\n");
         return;
@@ -410,6 +448,13 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         printer.Print(vars, "return $name$[index];\n");
         printer.Outdent();
         printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars, "$refer_name$ = 0;\n");
+        printer.Outdent();
+        printer.Print("}\n");
     }
     else {
         // xxxx()
@@ -425,6 +470,13 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         printer.Print(vars, "$name$ = val;\n");
         printer.Outdent();
         printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars, "$name$ = 0;\n");
+        printer.Outdent();
+        printer.Print("}\n");
     }
  
 }
@@ -437,6 +489,7 @@ void CGenerator::GenerateFieldEnumFunc(const FieldDescriptor* descriptor, Printe
     vars["access_func"] = GetMessageFieldAccessFuncName(descriptor);
     vars["mutable_func"] = GetMessageFieldMutableFuncName(descriptor);
     vars["has_func"] = GetMessageFieldHasFuncName(descriptor);
+    vars["clear_has_func"] = GetMessageFieldHasFlagClearFuncName(descriptor);
 
     if (IsRepeated(descriptor)) {
         vector<string> max_len;
@@ -468,6 +521,14 @@ void CGenerator::GenerateFieldEnumFunc(const FieldDescriptor* descriptor, Printe
         printer.Print(vars, "return $name$[index];\n");
         printer.Outdent();
         printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "$refer_name$ = ($enumname$) 0;\n");
+        printer.Outdent();
+        printer.Print("}\n");
     }
     else {
         // xxxx()
@@ -481,6 +542,14 @@ void CGenerator::GenerateFieldEnumFunc(const FieldDescriptor* descriptor, Printe
         printer.Print(vars, "inline void set_$access_func$($enumname$ val) {\n");
         printer.Indent();
         printer.Print(vars, "$name$ = val;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "$name$ = ($enumname$)0;\n");
         printer.Outdent();
         printer.Print("}\n");
     }
@@ -546,6 +615,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         }   else {
             printer.Print(vars,
                     "if (!$has_func$()){\n"
+                    "    $name$.clear();\n"
                     "    $has_var$[$has_index$] |= $has_mask$;\n"
                     "}\n"
                     "return &$name$;\n");
@@ -688,7 +758,7 @@ void CGenerator::GenerateFieldOneOfMessageFunc(const FieldDescriptor* descriptor
         printer.Indent();
         printer.Print(vars,
             "if (!$has_func$()){\n"
-            "    memset(&$union_field_name$.$name$, 0, sizeof($union_field_name$.$name$));\n"
+            "    $union_field_name$.$name$.clear();\n"
             "    $one_of_select_fieldname$ = $oneof_id$;\n"
             "}\n"
             "return &$union_field_name$.$name$;\n");
@@ -741,6 +811,7 @@ void CGenerator::GenerateFieldCTypeFunc(const FieldDescriptor* descriptor, Print
     vars["access_func"] = GetMessageFieldAccessFuncName(descriptor);
     vars["mutable_func"] = GetMessageFieldMutableFuncName(descriptor);
     vars["has_func"] = GetMessageFieldHasFuncName(descriptor);
+    vars["clear_has_func"] = GetMessageFieldHasFlagClearFuncName(descriptor);
     
     GOOGLE_CHECK(GetCTypeName(descriptor->options(), vars["primitivetype"]) == true);
 
@@ -774,6 +845,14 @@ void CGenerator::GenerateFieldCTypeFunc(const FieldDescriptor* descriptor, Print
         printer.Print(vars, "return $name$[index];\n");
         printer.Outdent();
         printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "$refer_name$ = 0;\n");
+        printer.Outdent();
+        printer.Print("}\n");
     }
     else {
         // xxxx
@@ -787,6 +866,14 @@ void CGenerator::GenerateFieldCTypeFunc(const FieldDescriptor* descriptor, Print
         printer.Print(vars, "inline void set_$access_func$($primitivetype$ val) {\n");
         printer.Indent();
         printer.Print(vars, "$name$ = val;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "$name$ = 0;\n");
         printer.Outdent();
         printer.Print("}\n");
     }
@@ -826,8 +913,8 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
     vars["type"] = PrimitiveTypeCName(descriptor);
     vars["access_func"] = GetMessageFieldAccessFuncName(descriptor);
     vars["has_func"] = GetMessageFieldHasFuncName(descriptor);
+    vars["clear_has_func"] = GetMessageFieldHasFlagClearFuncName(descriptor);
 
-    //TODO TODO
     if (descriptor->containing_oneof() != NULL) {
         vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(descriptor->containing_oneof());
         vars["one_of_select_fieldname_read"] = GetCStructUnionSelectVarName(descriptor->containing_oneof());
@@ -861,6 +948,16 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Indent();
         printer.Print(vars,
             "return $union_field_name$.$name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,
+            "if ($has_func$()) {"
+            "   $one_of_select_fieldname$ = 0;\n"
+            "}");
         printer.Outdent();
         printer.Print("}\n");
         return;
@@ -899,6 +996,13 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
             "return $refer_name$;\n");
         printer.Outdent();
         printer.Print("}\n");
+
+        // clear_xxxx
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,"$refer_name$ = 0;\n");
+        printer.Outdent();
+        printer.Print("}\n");
     }
     else {
         // xxxx()
@@ -918,6 +1022,13 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
 #else
             "strncpy($name$, field,  sizeof($name$));$name$[sizeof($name$)-1]=0;\n");
 #endif
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // clear_xxx()
+        printer.Print(vars, "inline void $clear_has_func$(){\n");
+        printer.Indent();
+        printer.Print(vars,"$name$[0] = 0;");
         printer.Outdent();
         printer.Print("}\n");
     }

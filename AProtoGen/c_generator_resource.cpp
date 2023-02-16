@@ -3,7 +3,6 @@
 #include "c_gen_encode.h"
 #include "c_gen_string.h"
 #include "c_gen_json.h"
-#include "c_gen_clear.h"
 #include "c_gen_assign.h"
 #include "c_gen_unit_test.h"
 #include "c_gen_speed_test.h"

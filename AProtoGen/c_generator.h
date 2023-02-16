@@ -87,6 +87,8 @@ protected:
     void GenerateFieldOneOfMessageFunc(const FieldDescriptor* descriptor, Printer& printer) const;
     // 生成String字段相关函数
     void GenerateFieldStringFunc(const FieldDescriptor* descriptor, Printer& printer) const;
+    // 生成清空所有字段的函数
+    void GenerateClearFunc(const Descriptor* descriptor, Printer& printer) const;
 };
 
 #endif //C_GENERATOR_H__

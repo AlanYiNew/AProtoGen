@@ -50,7 +50,7 @@ std::string GetMessageFieldName(const std::string field_name)
 
 std::string GetMessageFieldHasFlagClearFuncName(const FieldDescriptor* descriptor)
 {
-    return "clear_has_" +  descriptor->name();
+    return "clear_" +  descriptor->name();
 }
 
 std::string GetMessageFieldHasFlagVarName()

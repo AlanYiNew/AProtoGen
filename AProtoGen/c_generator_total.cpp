@@ -3,7 +3,6 @@
 #include "c_gen_encode.h"
 #include "c_gen_string.h"
 #include "c_gen_json.h"
-#include "c_gen_clear.h"
 #include "c_gen_assign.h"
 #include "c_gen_unit_test.h"
 #include "c_gen_speed_test.h"
@@ -64,14 +63,12 @@ Generate(const FileDescriptor* file,
     CEncodeGenerator generator_encode(&file_generator);
     CStringGenerator generator_string(&file_generator);
     CJsonGenerator generator_json(&file_generator);
-    CClearGenerator generator_clear(&file_generator);
     
     bool generator_ret_value = generator.Generate(file, parameter, generator_context, error, generate_assign) && 
     generator_decode.Generate(file, parameter, generator_context, error) &&
     generator_string.Generate(file, parameter, generator_context, error) &&
     generator_json.Generate(file, parameter, generator_context, error) &&
-    generator_encode.Generate(file, parameter, generator_context, error) && 
-    generator_clear.Generate(file, parameter, generator_context, error) ;
+    generator_encode.Generate(file, parameter, generator_context, error); 
 
     if(generate_test) {
         CUnitTestGenerator generator_unit_test(&file_generator);
