@@ -6,15 +6,15 @@
 #include "time.h"
 #include "stdio.h"
 struct tagJsonPrintOptionsPbc {
-    bool always_print_primitive_fields;
-    bool preserve_proto_field_names;
-    bool url_encode_strings;
+    bool always_print_primitive_fields{};
+    bool preserve_proto_field_names{};
+    bool url_encode_strings{};
 };
 typedef struct tagJsonPrintOptionsPbc JSONPRINTOPTIONSPBC;
 typedef struct tagJsonPrintOptionsPbc *LPJSONPRINTOPTIONSPBC;
 
 struct tagJsonParseOptionsPbc {
-    bool url_encode_strings;
+    bool url_encode_strings{};
 };
 typedef struct tagJsonParseOptionsPbc JSONPARSEOPTIONSPBC;
 typedef struct tagJsonParseOptionsPbc *LPJSONPARSEOPTIONSPBC;
