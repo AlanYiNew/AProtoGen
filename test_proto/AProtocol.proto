@@ -17,7 +17,7 @@ enum NumVal {
 message helloworld
 {
     int32 id = 1;       // ID
-    string str = 2[(AExt.size) = "2"];     // str
+    string str = 2[(AExt.size) = "2000"];     // str
     int32 opt = 3;      //optional field
     Inner inner1 = 4;// temp
     Inner inner2 = 5;// temp
@@ -36,8 +36,8 @@ message helloworld
         string d = 19[(AExt.oneof_id) = "NUMVAL3", (AExt.size) = "Protocol::NUMVAL2"];
 	}
 
-    repeated string stringList = 15[(AExt.count) = "5", (AExt.size) = "3"];
-    repeated NumVal enumValList = 16[(AExt.count) = "5"];
+    repeated string stringList = 15[(AExt.count) = "5000", (AExt.size) = "300"];
+    repeated NumVal enumValList = 16[(AExt.count) = "5000"];
     NumVal enumVal = 17;
-    repeated int32 intList = 18[(AExt.count) = "5"];
+    repeated int32 intList = 18[(AExt.count) = "5000"];
 }

@@ -352,7 +352,7 @@ GenerateEncodeUnitTest(Printer* printer) {
 
         // 使用pbc解码json字符串，测试pbc能否解码自己编码的json格式
         "// use pbc to decode the json string\n"
-        "$c_name$ msg_obj_c_json;\n"
+        "static $c_name$ msg_obj_c_json;\n"
         "memset(&msg_obj_c_json, 0, sizeof(msg_obj_c_json));\n"
         "JSONPARSEOPTIONSPBC json_parse_option;\n"
         "memset(&json_parse_option, 0, sizeof(json_parse_option));\n"

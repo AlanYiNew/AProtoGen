@@ -540,7 +540,7 @@ bool CFileGenerator::
 GenerateSpeedTestSource(Printer* printer) {
     printer->Print(
       "#include <math.h>\n"
-      "#include <time.h>\n"
+      "#include <ctime>\n"
       "#include <map>\n"
       "#include \"$name$.h\"\n"
       "#include \"$basename$_assign.h\"\n",
@@ -570,7 +570,8 @@ GenerateEncodeUnitTest(Printer* printer) {
     printer->Print(GetEncodeUnitTestFun().c_str());
     printer->Print("{\n");
     printer->Indent();
-    printer->Print("srand(time(NULL));");
+    printer->Print("std::time_t t = std::time(nullptr);\n");
+    printer->Print("srand(t);");
     for (size_t i = 0; i < message_generators_.size(); ++i) {
         printer->Print("{\n");
         printer->Indent();

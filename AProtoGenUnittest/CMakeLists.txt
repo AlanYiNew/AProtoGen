@@ -1,11 +1,9 @@
-# CMakeList.txt: AConvert µƒ CMake œÓƒø£¨‘⁄¥À¥¶∞¸¿®‘¥¥˙¬Î≤¢∂®“Â
-# œÓƒøÃÿ∂®µƒ¬ﬂº≠°£
+# CMakeList.txt: AConvert ÁöÑ CMake È°πÁõÆÔºåÂú®Ê≠§Â§ÑÂåÖÊã¨Ê∫ê‰ª£Á†ÅÂπ∂ÂÆö‰πâ
+# È°πÁõÆÁâπÂÆöÁöÑÈÄªËæë„ÄÇ
 #
 cmake_minimum_required (VERSION 3.8)
 project ("AProtoGenUnitTest")
 
-
-SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 SET(Protobuf_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include/")
@@ -108,7 +106,6 @@ else()
 	message("current platform: unkonw ")
 endif()
 
-message(${CMAKE_BINARY_DIR}/flatproto/${ACONVERT_EXECUTABLE})
 add_custom_command(OUTPUT ${OUTPUT_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${OUTPUT_JSON_SOURCES} 
                    PRE_BUILD
                    COMMAND ${ACONVERT_EXECUTABLE} --flat_out=${PROTO_PATH}  -I${PROTO_PATH} -I${Protobuf_INCLUDE_DIR} -I${LIB_PROTO_PATH} ${PROTO_FILES}
@@ -157,7 +154,6 @@ add_custom_command(OUTPUT ${LIB_PROTO_SOURCES}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${LIB_PROTO_FILES} ${Protobuf_LIBRARY}/${PROTOC_EXECUTABLE}
                    COMMENT ${COMMAND})
-
 
 add_executable(AProtoGenUnitTest ${LIB_PROTO_CSOURCES} ${OUTPUT_SOURCES} ${ASSIGN_SOURCES} ${LIBPROTO_ASSIGN_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${UNITEST_SOURCES} ${OUTPUT_PROTO_SOURCES} ${LIB_PROTO_SOURCES} ${UNITTEST_MAIN_SRC_FILES} ${OUTPUT_JSON_SOURCES})
 add_executable(AProtoGenSpeedTest ${LIB_PROTO_CSOURCES} ${OUTPUT_SOURCES} ${ASSIGN_SOURCES} ${LIBPROTO_ASSIGN_SOURCES} ${OUTPUT_DECODEC_SOURCES} ${OUTPUT_ENCODEC_SOURCES} ${SPEEDTEST_SOURCES} ${SPEEDTEST_LIB_SOURCES}  ${OUTPUT_PROTO_SOURCES} ${LIB_PROTO_SOURCES} ${OUTPUT_JSON_SOURCES} ${SPEEDTEST_MAIN_SRC_FILES})

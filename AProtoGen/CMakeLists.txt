@@ -3,8 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 SET(Protobuf_INCLUDE_DIR ../include/)
 SET(Protobuf_LIBRARY ../lib/)
@@ -74,10 +72,3 @@ endif()
 
 # 将源代码添加到此项目的可执行文件。
 target_link_directories(${BIN_NAME} PRIVATE ${Protobuf_LIBRARY} ${Protobuf_INCLUDE_DIR})
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET ${BIN_NAME} PROPERTY CXX_STANDARD 14)
-endif()
-
-
-

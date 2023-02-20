@@ -118,7 +118,7 @@ GenerateEnum(const EnumDescriptor* descriptor, Printer& printer) const {
     vars["name"] = GetCEnumName(descriptor);
 	
     printer.Print(vars, "/* $comment$ */\n");
-    printer.Print(vars, "typedef enum tag$name$ {\n");
+    printer.Print(vars, "enum $name$ {\n");
     printer.Indent();
     printer.Indent();
     int max = std::numeric_limits<int>::min();
@@ -142,7 +142,7 @@ GenerateEnum(const EnumDescriptor* descriptor, Printer& printer) const {
     printer.Print(vars, "$name$_MAX = $max$,\n");
     printer.Outdent();
     printer.Outdent();
-    printer.Print(vars, "} $name$;\n"); 
+    printer.Print(vars, "};\n"); 
 
     // 生成枚举的array size为枚举最大值加一
     vars["name"] = ToUpper(vars["name"]);
@@ -168,10 +168,7 @@ GenerateStructForwardDeclaration(const Descriptor* descriptor, Printer& printer)
     map<string, string> vars;
     vars["name"] = GetCStructName(descriptor); 
     vars["upper_name"] = ToUpper(vars["name"]); 
-    printer.Print(vars, "struct tag$name$;\n");
-    printer.Print(vars, "typedef struct tag$name$ $name$;\n");
-    printer.Print(vars, "typedef struct tag$name$ $upper_name$;\n");
-    printer.Print(vars, "typedef struct tag$name$*LP$upper_name$;\n\n");
+    printer.Print(vars, "struct $name$;\n");
 }
 
 void CGenerator::
@@ -185,7 +182,7 @@ GenerateStruct(const Descriptor* descriptor, Printer& printer) const {
 	vars["comment"] = stlocation.leading_comments.substr(0, ipos);
 
     printer.Print(vars, "/* $comment$ */ \n");
-    printer.Print(vars, "struct tag$name${\n");
+    printer.Print(vars, "struct $name${\n");
     printer.Indent();
     printer.Indent();
 
@@ -256,8 +253,7 @@ GenerateCachedSizeStructForwardDeclaration(const Descriptor* descriptor, Printer
 {
     map<string, string> vars;
     vars["name"] = GetCCachedSizeStructName(descriptor); 
-    printer.Print(vars, "struct tag$name$;\n");
-    printer.Print(vars, "typedef struct tag$name$ $name$;\n");
+    printer.Print(vars, "struct $name$;\n");
 }
 
 void CGenerator::
@@ -265,7 +261,7 @@ GenerateCachedSizeStruct(const Descriptor* descriptor, Printer& printer) const {
 
     map<string, string> vars;
     vars["name"] = GetCCachedSizeStructName(descriptor); 
-    printer.Print(vars, "struct tag$name$ {\n");
+    printer.Print(vars, "struct $name$ {\n");
     printer.Indent(); 
     printer.Indent(); 
 
@@ -1132,7 +1128,7 @@ GenerateUnionFieldEnum(const OneofDescriptor* descriptor, Printer& printer) cons
 
     map<string, string> vars;
     vars["name"] = GetCUnionEnumName(descriptor); 
-    printer.Print(vars, "typedef enum tag$name$ {\n");
+    printer.Print(vars, "typedef enum $name$ {\n");
     printer.Indent(); 
     printer.Indent();
 
@@ -1158,11 +1154,7 @@ void CGenerator::
 GenerateUnionForwardDeclaration(const OneofDescriptor* descriptor, Printer& printer) const {
     map<string, string> vars;
     vars["name"] = GetCUnionName(descriptor); 
-    printer.Print(vars, "union tag$name$;\n");
-    vars["upper_name"] = ToUpper(vars["name"]); 
-    printer.Print(vars, "typedef union tag$name$ $name$;\n");
-    printer.Print(vars, "typedef union tag$name$ $upper_name$;\n");
-    printer.Print(vars, "typedef union tag$name$* LP$upper_name$;\n");
+    printer.Print(vars, "union $name$;\n");
 }
 
 void CGenerator::
@@ -1177,7 +1169,7 @@ GenerateUnion(const OneofDescriptor* descriptor, Printer& printer) const {
 
     vars["name"] = GetCUnionName(descriptor); 
     printer.Print(vars, "/* $comment$ */ \n");
-    printer.Print(vars, "union tag$name$ {\n");
+    printer.Print(vars, "union $name$ {\n");
     printer.Indent(); 
     printer.Indent();
 
@@ -1194,15 +1186,14 @@ void CGenerator::
 GenerateCachedSizeUnionForwardDeclaration(const OneofDescriptor* descriptor, Printer& printer) const {
     map<string, string> vars;
     vars["name"] = GetCCachedSizeUnionName(descriptor); 
-    printer.Print(vars, "union tag$name$;\n");
-    printer.Print(vars, "typedef union tag$name$ $name$;\n");
+    printer.Print(vars, "union $name$;\n");
 }
  
 void CGenerator::
 GenerateCachedSizeUnion(const OneofDescriptor* descriptor, Printer& printer) const {
     map<string, string> vars;
     vars["name"] = GetCCachedSizeUnionName(descriptor); 
-    printer.Print(vars, "typedef union tag$name$ {\n");
+    printer.Print(vars, "union $name$ {\n");
     printer.Indent(); 
     printer.Indent();
 
@@ -1211,7 +1202,7 @@ GenerateCachedSizeUnion(const OneofDescriptor* descriptor, Printer& printer) con
     }
     printer.Outdent();
     printer.Outdent();
-    printer.Print(vars, "} $name$;\n");
+    printer.Print(vars, "};\n");
 }
   
 void CGenerator::
