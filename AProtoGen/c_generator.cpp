@@ -96,6 +96,9 @@ GenerateHead(const FileDescriptor* file, Printer& printer) const {
     }
     printer.Print("#include <cstring>\n");
     printer.Print("#include <cstdint>\n");
+    if (GetStrictFlat(file)) {
+        printer.Print("#pragma pack(1)\n");
+    }
     printer.Print("\n");
 }
 
@@ -104,6 +107,10 @@ GenerateEnd(const FileDescriptor* file, Printer& printer) const {
 
     map<string, string> vars;
     vars["name"] =  ToUpper(StripSuffixString(GetFileName(file->name()), ".proto")); 
+
+    if (GetStrictFlat(file)) {
+        printer.Print("#pragma pack()\n");
+    }
     printer.Print(vars, "#endif //$name$_H__");
 }
 
@@ -578,8 +585,8 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Indent();
         printer.Print(vars,
             "if ($refer_name$ >= $max_len_1$) return NULL;\n"
-            "memset($name$[$refer_name$], 0, sizeof($name$[$refer_name$]));\n"
-            "$msgname$* ret = &$name$[$refer_name$]"
+            "memset(&$name$[$refer_name$], 0, sizeof($name$[$refer_name$]));\n"
+            "$msgname$* ret = &$name$[$refer_name$];\n"
             "$refer_name$++;"
             "return ret;\n");
         printer.Outdent();
@@ -588,7 +595,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Print(vars, "inline void add_$access_func$(const $msgname$& field) {\n");
         printer.Indent();
         printer.Print(vars,
-            "if ($refer_name$ >= $max_len_1$) return NULL;\n"
+            "if ($refer_name$ >= $max_len_1$) return;\n"
             "$name$[$refer_name$] = field;\n"
             "$refer_name$++;\n"
             "return;\n");
@@ -630,14 +637,6 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Outdent();
         printer.Print("}\n");
 
-        // xxxx_size()
-        //printer.Print(vars, "inline int $access_func$_size(const $type$* fiel) {\n");
-        printer.Print(vars, "inline int $access_func$_size() const{\n");
-        printer.Indent();
-        printer.Print(vars,
-            "return $refer_name$;\n");
-        printer.Outdent();
-        printer.Print("}\n");
     }
     else {
 
@@ -655,19 +654,11 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Indent();
         printer.Print(vars,
             "if (index < $refer_name$ && index >= 0){\n"
-            "    $name$[index] = field"
+            "    $name$[index] = field;\n"
             "}\n");
         printer.Outdent();
         printer.Print("}\n");
 
-        // xxxx_size()
-        //printer.Print(vars, "inline int $access_func$_size(const $type$* fiel) {\n");
-        printer.Print(vars, "inline int $access_func$_size() const{\n");
-        printer.Indent();
-        printer.Print(vars,
-            "return $refer_name$;\n");
-        printer.Outdent();
-        printer.Print("}\n");
     }
     else {
         printer.Print(vars, "inline void set_$access_func$(const $msgname$& field) {\n");
@@ -686,13 +677,6 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Outdent();
         printer.Print("}\n");
 
-        // xxxx_size()
-        printer.Print(vars, "inline int $access_func$_size(const $type$* fiel) {\n");
-        printer.Indent();
-        printer.Print(vars,
-            "return $refer_name$;\n");
-        printer.Outdent();
-        printer.Print("}\n");
     }
     else {
         printer.Print(vars, "inline int $has_func$() const{\n");
@@ -714,13 +698,6 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Outdent();
         printer.Print("}\n");
 
-        // xxxx_size()
-        printer.Print(vars, "inline int $access_func$_size(const $type$* fiel) {\n");
-        printer.Indent();
-        printer.Print(vars,
-            "return $refer_name$;\n");
-        printer.Outdent();
-        printer.Print("}\n");
     }
     else {
         printer.Print(vars, "inline void $clear_has_func$() {\n");

@@ -718,8 +718,7 @@ GenerateAutoFillC(Printer* printer) {
     GenerateAutoFillIterationHead(&vars_, printer);
     printer->Indent();
     printer->Print(vars_, 
-      "$fill_fun$($param_c_var$->mutable_$cpp_name$(i));\n");
-    printer->Print(vars_, "$param_c_var$->$array_num$++;\n");
+      "$fill_fun$($param_c_var$->add_$cpp_name$());\n");
     printer->Outdent();
     GenerateAutoFillIterationTail(&vars_, printer);
     return true;
@@ -746,8 +745,8 @@ GenerateCompareCAndCpp(Printer* printer) {
     GenerateRepeatedSizeCompare(&vars_, printer, false);
     printer->Print(vars_,
       "for (int32_t i = 0; i < $param_cpp_var$->$cpp_name$_size(); i++) {\n"
-      "  if (!$compare_fun$(&$param_c_var$->$c_name$[i],\n"
-      "    $param_cpp_var$->mutable_$cpp_name$(i))) {\n"
+      "  if (!$compare_fun$(&$param_c_var$->$access_func$(i),\n"
+      "    &$param_cpp_var$->$cpp_name$(i))) {\n"
       "     std::cout << \"$parent_type$::$c_name$ repeated:\"\n"
       "          << i << \" element not equal\"\n"
       "          << std::endl;\n"
@@ -786,7 +785,7 @@ GenerateAssignCToCpp(Printer* printer) {
     printer->Print(vars_, "for (uint32_t i = 0; i < $param_c_var$.$array_num$; i++) {\n");
     printer->Indent();
     printer->Print(vars_, 
-            "if (!$c_2_cpp_fun$($param_c_var$.$c_name$[i], *$param_cpp_var$.add_$cpp_name$())) return false;\n");
+            "if (!$c_2_cpp_fun$($param_c_var$.$access_func$(i), *$param_cpp_var$.add_$cpp_name$())) return false;\n");
     printer->Outdent();
     printer->Print(vars_, "}\n");
     return true;
@@ -797,7 +796,7 @@ GenerateAssignCppToC(Printer* printer) {
     printer->Print(vars_, "for (uint32_t i = 0; i < $param_cpp_var$.$cpp_name$_size() && i < $array_max$; i++) {\n");
     printer->Indent();
     printer->Print(vars_,
-            "if (!$cpp_2_c_fun$($param_cpp_var$.$cpp_name$(i), $param_c_var$.add_$access_func$())) return false;\n");
+            "if (!$cpp_2_c_fun$($param_cpp_var$.$cpp_name$(i), *$param_c_var$.add_$access_func$())) return false;\n");
     
     printer->Outdent();
     printer->Print(vars_, "}\n");

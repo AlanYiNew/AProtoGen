@@ -40,4 +40,5 @@ message helloworld
     repeated NumVal enumValList = 16[(AExt.count) = "5000"];
     NumVal enumVal = 17;
     repeated int32 intList = 18[(AExt.count) = "5000"];
+    repeated Inner innerLit = 20[(AExt.count) = "10"];
 }

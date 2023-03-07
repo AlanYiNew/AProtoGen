@@ -22,6 +22,7 @@ extend google.protobuf.MessageOptions {
     string file_name = 1001;         // filename
     string xlsx_name = 1002;         // xlsxname
     string sheet_name = 1003;        // sheet_name
+    string key_name = 1004;          // key_name 
 }
 
 extend google.protobuf.FileOptions {
