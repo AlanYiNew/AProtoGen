@@ -694,7 +694,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
     if (IsRepeated(descriptor)) {
         printer.Print(vars, "inline void $clear_has_func$() {\n");
         printer.Indent();
-        printer.Print(vars, "$refer_name$ == 0;\n");
+        printer.Print(vars, "$refer_name$ = 0;\n");
         printer.Outdent();
         printer.Print("}\n");
 
@@ -1058,7 +1058,7 @@ GenerateStructField(const FieldDescriptor* descriptor, Printer& printer, set<str
 
     // 如果extention中没有num_field但该字段需要refer，则添加refer字段
     if(NeedGenerateArrayLenField(descriptor)) {
-        printer.Print("uint32_t $name$;\n",
+        printer.Print("int32_t $name$;\n",
                       "name", GetCArrayLenVarNameDefault(descriptor));    
     }
 }
