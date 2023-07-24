@@ -7,6 +7,7 @@
 #include "c_generator_total.h"
 #include "c_generator_resource.h"
 #include <google/protobuf/compiler/cpp/generator.h>
+#include <google/protobuf/compiler/python/generator.h>
 #include <google/protobuf/compiler/command_line_interface.h>
   
 int main(int argc, char* argv[]) {
@@ -20,6 +21,10 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<google::protobuf::compiler::cpp::CppGenerator> cpp_generator = std::make_unique<google::protobuf::compiler::cpp::CppGenerator>();
     cli.RegisterGenerator("--cpp_out", cpp_generator.get(), "Generate C++ source and header.");
     cli.RegisterGenerator("--flat_out", "--flat_opt", c_generator.get(), "Generate Flat file.");
+
+    std::unique_ptr<google::protobuf::compiler::python::Generator> python_generator = std::make_unique<google::protobuf::compiler::python::Generator>();
+    cli.RegisterGenerator("--python3_out", python_generator.get(), "Generate C++ source and header.");
+
     /*
     argc = 6;
     argv[1] = "--c_out=./";
