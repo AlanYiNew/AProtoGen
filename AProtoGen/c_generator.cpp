@@ -426,6 +426,14 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         GetMaxLen(descriptor->options(), max_len);
         vars["max_len_1"] = max_len.size() > 0 ? GetFieldOptionExtendMaxLenName(descriptor->file(), max_len[0]) : SimpleItoa(kRepeatDefaultDefaultLen);
         vars["refer_name"] = GetCArrayLenVarName(descriptor);
+        // available_xxxx
+        printer.Print(vars, "inline int32_t available_$access_func$() {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
         // add_xxxx
         printer.Print(vars, "inline void add_$access_func$($primitivetype$ field) {\n");
         printer.Indent();
@@ -499,6 +507,14 @@ void CGenerator::GenerateFieldEnumFunc(const FieldDescriptor* descriptor, Printe
         GetMaxLen(descriptor->options(), max_len);
         vars["max_len_1"] = max_len.size() > 0 ? GetFieldOptionExtendMaxLenName(descriptor->file(), max_len[0]) : SimpleItoa(kRepeatDefaultDefaultLen);
         vars["refer_name"] = GetCArrayLenVarName(descriptor);
+        // available_xxxx
+        printer.Print(vars, "inline int32_t available_$access_func$() {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
         // add_xxxx
         printer.Print(vars, "inline void add_$access_func$($enumname$ field) {\n");
         printer.Indent();
@@ -581,6 +597,14 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         GetMaxLen(descriptor->options(), max_len);
         vars["max_len_1"] = max_len.size() > 0 ? GetFieldOptionExtendMaxLenName(descriptor->file(), max_len[0]) : SimpleItoa(kRepeatDefaultDefaultLen);
 
+        // available xxxx
+        printer.Print(vars, "inline int32_t available_$access_func$() {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
         printer.Print(vars, "inline $msgname$* add_$access_func$() {\n");
         printer.Indent();
         printer.Print(vars,
@@ -603,7 +627,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Print("}\n");
 
         // xxxx_size()
-        printer.Print(vars, "inline int $access_func$_size() const{\n");
+        printer.Print(vars, "inline int32_t $access_func$_size() const{\n");
         printer.Indent();
         printer.Print(vars,
             "return $refer_name$;\n");
@@ -793,6 +817,16 @@ void CGenerator::GenerateFieldCTypeFunc(const FieldDescriptor* descriptor, Print
         GetMaxLen(descriptor->options(), max_len);
         vars["max_len_1"] = max_len.size() > 0 ? GetFieldOptionExtendMaxLenName(descriptor->file(), max_len[0]) : SimpleItoa(kRepeatDefaultDefaultLen);
         vars["refer_name"] = GetCArrayLenVarName(descriptor);
+
+        // available_xxxx
+        printer.Print(vars, "inline int32_t available_$access_func$() {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+
         // add_xxxx
         printer.Print(vars, "inline void add_$access_func$($primitivetype$ field) {\n");
         printer.Indent();
@@ -941,6 +975,14 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         std::vector<std::string> max_len;
         GetMaxLen(descriptor->options(), max_len);
         vars["max_len_1"] = max_len.size() > 0 ? GetFieldOptionExtendMaxLenName(descriptor->file(), max_len[0]) : SimpleItoa(kRepeatDefaultDefaultLen);
+        // available_xxxx
+        printer.Print(vars, "inline int32_t available_$access_func$() {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
         // xxxx()
         printer.Print(vars, "inline const $type$* $access_func$(int index) const {\n");
         printer.Indent();
