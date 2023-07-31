@@ -434,6 +434,13 @@ void CGenerator::GenerateFieldPimitiveFunc(const FieldDescriptor* descriptor, Pr
         printer.Outdent();
         printer.Print("}\n");
 
+        // set_xxxx
+        printer.Print(vars, "inline void set_$access_func$(int32_t index, $primitivetype$ val) {\n");
+        printer.Indent();
+        printer.Print(vars, "$name$[index] = val;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
         // add_xxxx
         printer.Print(vars, "inline void add_$access_func$($primitivetype$ field) {\n");
         printer.Indent();
@@ -512,6 +519,13 @@ void CGenerator::GenerateFieldEnumFunc(const FieldDescriptor* descriptor, Printe
         printer.Indent();
         printer.Print(vars,
             "return $max_len_1$ - $refer_name$;\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // set_xxxx
+        printer.Print(vars, "inline void set_$access_func$(int32_t index, $enumname$ val) {\n");
+        printer.Indent();
+        printer.Print(vars, "$name$[index] = val;\n");
         printer.Outdent();
         printer.Print("}\n");
 
@@ -605,6 +619,16 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Outdent();
         printer.Print("}\n");
 
+        // mutable_xxxx
+        printer.Print(vars, "inline $msgname$* mutable_$access_func$(int32_t index) {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "if (index < 0 || index >= $refer_name$) return NULL;\n"
+            "return &$name$[index];\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // add_xxxx
         printer.Print(vars, "inline $msgname$* add_$access_func$() {\n");
         printer.Indent();
         printer.Print(vars,
@@ -616,6 +640,7 @@ void CGenerator::GenerateFieldMessageFunc(const FieldDescriptor* descriptor, Pri
         printer.Outdent();
         printer.Print("}\n");
 
+        // add_xxxx()
         printer.Print(vars, "inline void add_$access_func$(const $msgname$& field) {\n");
         printer.Indent();
         printer.Print(vars,
@@ -826,6 +851,12 @@ void CGenerator::GenerateFieldCTypeFunc(const FieldDescriptor* descriptor, Print
         printer.Outdent();
         printer.Print("}\n");
 
+        // set_xxxx
+        printer.Print(vars, "inline void set_$access_func$(int32_t index, $primitivetype$ val) {\n");
+        printer.Indent();
+        printer.Print(vars, "$name$[index] = val;\n");
+        printer.Outdent();
+        printer.Print("}\n");
 
         // add_xxxx
         printer.Print(vars, "inline void add_$access_func$($primitivetype$ field) {\n");
@@ -988,6 +1019,19 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Indent();
         printer.Print(vars,
             "return $name$[index];\n");
+        printer.Outdent();
+        printer.Print("}\n");
+
+        // set_xxxx()
+        printer.Print(vars, "inline void set_$access_func$(int32_t index, const $type$* field) {\n");
+        printer.Indent();
+        printer.Print(vars,
+            "if (index < 0 || index >= $refer_name$) return;\n"
+#if defined (_WIN32) || (_WIN64)
+            "strncpy_s($name$[index],  sizeof($name$[0]), field, strlen(field));\n");
+#else
+            "strncpy($name$[index], field,  sizeof($name$[0]));$name$[index][sizeof($name$[0]) - 1] = 0;\n");
+#endif
         printer.Outdent();
         printer.Print("}\n");
 
