@@ -179,7 +179,7 @@ string GetCStructUnionSelectVarName(const OneofDescriptor* descriptor) {
     // a.b.id形式需要拆解 mutable_a()->mutable_b()->id
     std::vector<std::string> res;
     SplitStringUsing(name, ".", &res);
-    if (res.size() <= 1) return GetMessageFieldAccessFuncName(name);
+    if (res.size() <= 1) return GetMessageFieldName(name);
 
     for (size_t i = 0; i < res.size()-1; i++)
     {
