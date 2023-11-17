@@ -7,6 +7,19 @@ message Inner {
     string str = 2[(AExt.size) = "3"];
 }
 
+enum MAX_LEN {
+    option allow_alias = true;
+    MAX_LEN_NONE = 0;
+    MAX_LEN_OPENID = 64;
+    MAX_PAGE_SIZE = 30;
+    MAX_MONEY_TYPE_SIZE = 10;
+    MAX_LEN_STRING = 256;
+    MAX_LEN_STRING_512 = 512;
+    MAX_MAIL_ITEMS_NUM = 10;
+    MAX_EVENT_LOG_NUM = 200;
+    MAX_MAIL_TITLE_LENGTH = 128;
+};
+
 enum NumVal {
     NumVal0 = 0;
     NumVal1 = 1;
@@ -29,7 +42,7 @@ message helloworld
     Inner inner8 = 11;// temp
     
     oneof object {
-        option (AExt.select) = "inner1.temp";
+        option (AExt.select) = "id";
 		float a  = 12[(AExt.oneof_id) = "NUMVAL0"];
 		uint32 b = 13[(AExt.oneof_id) = "NUMVAL1"];
         Inner c = 14[(AExt.oneof_id) = "NUMVAL2"];
@@ -42,3 +55,54 @@ message helloworld
     repeated int32 intList = 18[(AExt.count) = "5000"];
     repeated Inner innerLit = 20[(AExt.count) = "10"];
 }
+
+message Item {
+    int32 iId = 1;
+    int32 iNum = 2;
+};
+
+message RoleBase {
+    uint64 ullPlayerId = 1;
+    string szOpenId = 2[(AExt.size) = "PROTOCOL::MAX_LEN_OPENID"];
+};
+
+message Money {
+    int32 iType = 1;
+    int32 iNum = 2;
+};
+
+message MoneyBag {
+    repeated Money astList = 1[(AExt.size) = "PROTOCOL::MAX_MONEY_TYPE_SIZE"]; 
+};
+
+message RoleExt {
+    MoneyBag stMoneyBag = 1;
+};
+
+message Role {
+    RoleBase stRoleBase = 1;
+    RoleExt stRoleExt = 2;
+};
+
+message EventLogMail {
+    int32 iTitleId = 1;
+    string szTitle = 2[(AExt.size) = "PROTOCOL::MAX_MAIL_TITLE_LENGTH"];
+    int32 iContenxtId = 3;
+    string szContext = 4[(AExt.size) = "PROTOCOL::MAX_LEN_STRING_512"];
+    repeated Item astItems = 5[(AExt.count) = "PROTOCOL::MAX_MAIL_ITEMS_NUM"];
+};
+
+enum EVENT_LOG_TYPE {
+    EVENT_LOG_TYPE_INVALID = 0;
+    EVENT_LOG_TYPE_MAIL = 1;
+};
+
+message EventLog {
+    uint64 ullPlayerId = 1;
+    int32 iId = 2;
+    int32 iType = 3;
+    oneof szData {
+        option (AExt.select) = "iType";
+		EventLogMail stEventLogMail  = 4[(AExt.oneof_id) = "PROTOCOL::EVENT_LOG_TYPE_MAIL"];
+	}
+};

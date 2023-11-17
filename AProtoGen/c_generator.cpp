@@ -966,9 +966,9 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
             "    $one_of_select_fieldname$ = $oneof_id$;\n"
             "}\n"
             #if defined (_WIN32) || (_WIN64)
-            "strncpy_s($union_field_name$.$name$,  sizeof($union_field_name$.$name$), field, strlen(field));\n");
+            "strncpy_s($union_field_name$.$name$,  sizeof($union_field_name$.$name$)-1, field, strlen(field));\n");
 #else
-            "strncpy($union_field_name$.$name$, field,  sizeof($union_field_name$.$name$));$union_field_name$.$name$[sizeof($union_field_name$.$name$) - 1] = 0;\n");
+            "strncpy($union_field_name$.$name$, field,  sizeof($union_field_name$.$name$)-1);$union_field_name$.$name$[sizeof($union_field_name$.$name$) - 1] = 0;\n");
 #endif
         printer.Outdent();
         printer.Print("}\n");
@@ -1028,9 +1028,9 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Print(vars,
             "if (index < 0 || index >= $refer_name$) return;\n"
 #if defined (_WIN32) || (_WIN64)
-            "strncpy_s($name$[index],  sizeof($name$[0]), field, strlen(field));\n");
+            "strncpy_s($name$[index],  sizeof($name$[0])-1, field, strlen(field));\n");
 #else
-            "strncpy($name$[index], field,  sizeof($name$[0]));$name$[index][sizeof($name$[0]) - 1] = 0;\n");
+            "strncpy($name$[index], field,  sizeof($name$[0])-1);$name$[index][sizeof($name$[0]) - 1] = 0;\n");
 #endif
         printer.Outdent();
         printer.Print("}\n");
@@ -1041,9 +1041,9 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Print(vars,
             "if ($refer_name$ >= $max_len_1$) return;\n"
 #if defined (_WIN32) || (_WIN64)
-            "strncpy_s($name$[$refer_name$++],  sizeof($name$[0]), field, strlen(field));\n");
+            "strncpy_s($name$[$refer_name$++],  sizeof($name$[0])-1, field, strlen(field));\n");
 #else
-            "strncpy($name$[$refer_name$++], field,  sizeof($name$[0]));$name$[$refer_name$-1][sizeof($name$[0]) - 1] = 0;\n");
+            "strncpy($name$[$refer_name$++], field,  sizeof($name$[0])-1);$name$[$refer_name$-1][sizeof($name$[0]) - 1] = 0;\n");
 #endif
         printer.Outdent();
         printer.Print("}\n");
@@ -1077,9 +1077,9 @@ void CGenerator::GenerateFieldStringFunc(const FieldDescriptor* descriptor, Prin
         printer.Indent();
         printer.Print(vars,
 #if defined (_WIN32) || (_WIN64)
-            "strncpy_s($name$,  sizeof($name$), field, strlen(field));\n");
+            "strncpy_s($name$,  sizeof($name$)-1, field, strlen(field));\n");
 #else
-            "strncpy($name$, field,  sizeof($name$));$name$[sizeof($name$)-1]=0;\n");
+            "strncpy($name$, field,  sizeof($name$)-1);$name$[sizeof($name$)-1]=0;\n");
 #endif
         printer.Outdent();
         printer.Print("}\n");
