@@ -813,6 +813,7 @@ void CGenerator::GenerateFieldOneOfMessageFunc(const FieldDescriptor* descriptor
         printer.Print(vars, "inline void $clear_has_func$() {\n");
         printer.Indent();
         //TODO 考虑跟0判断的合理性
+        printer.Print(vars, "$union_field_name$.$name$.clear();\n");
         printer.Print(vars, "$one_of_select_fieldname$ = 0;\n");
         printer.Outdent();
         printer.Print("}\n");
