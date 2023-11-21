@@ -237,8 +237,10 @@ GenerateClearFunc(const Descriptor* descriptor, Printer& printer) const
     printer.Indent();
     set<string> cleared_one_of;
     for (int i = 0; i < descriptor->field_count(); ++i) {
-         auto field_desc = descriptor->field(i);
-         if (field_desc->containing_oneof() != nullptr) {
+        auto field_desc = descriptor->field(i);
+        vars["call_clear_func"] = GetMessageFieldHasFlagClearFuncName(descriptor->field(i));
+        printer.Print(vars, "$call_clear_func$();\n");
+        if (field_desc->containing_oneof() != nullptr) {
             const OneofDescriptor* one_of_desc = field_desc->containing_oneof();
             if (cleared_one_of.find(one_of_desc->name()) != cleared_one_of.end()) {
                 continue;
@@ -246,9 +248,6 @@ GenerateClearFunc(const Descriptor* descriptor, Printer& printer) const
             cleared_one_of.insert(one_of_desc->name());
             vars["one_of_select_fieldname"] = GetCStructUnionSelectFieldName(field_desc->containing_oneof());
             printer.Print(vars, "$one_of_select_fieldname$ = 0;\n");  
-        }   else {
-            vars["call_clear_func"] = GetMessageFieldHasFlagClearFuncName(descriptor->field(i));
-            printer.Print(vars, "$call_clear_func$();\n");
         }
     }
     printer.Outdent();
